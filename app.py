@@ -1,10 +1,9 @@
 import streamlit as st
-import plotly.graph_objects as go
 import time
 import pandas as pd
 
 # ==========================================
-# [1. 시스템 설정 & 카카오톡 비즈니스 디자인]
+# [1. 시스템 설정 & 강제 화이트 모드 CSS]
 # ==========================================
 st.set_page_config(
     page_title="Biz-Finder Enterprise",
@@ -13,28 +12,33 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 카카오 스타일 CSS (가독성 최우선)
+# 카카오 비즈니스 스타일 (강제 화이트 적용)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
     
     html, body, [class*="css"] {
         font-family: 'Noto Sans KR', sans-serif;
-        background-color: #ffffff; /* 전체 배경 화이트 */
     }
-    
-    /* [핵심] 모든 텍스트 강제 진한 고동색/검정 (가독성 확보) */
-    h1, h2, h3, h4, h5, h6, p, div, span, label, li, td, th {
-        color: #191919 !important; /* 거의 검정에 가까운 다크그레이 */
+
+    /* [핵심] 시스템 다크모드 무시하고 강제 화이트 고정 */
+    [data-testid="stAppViewContainer"] {
+        background-color: #ffffff !important;
     }
-    
-    /* 사이드바 스타일 */
+    [data-testid="stHeader"] {
+        background-color: #ffffff !important;
+    }
     [data-testid="stSidebar"] {
-        background-color: #f7f7f7; /* 연한 회색 */
+        background-color: #f7f7f7 !important;
         border-right: 1px solid #ececec;
     }
     
-    /* 입력 필드 디자인 (카카오톡 입력창 느낌) */
+    /* [핵심] 모든 텍스트 강제 검정 (가독성 100%) */
+    .stApp, h1, h2, h3, h4, h5, h6, p, div, span, label, li, td, th {
+        color: #191919 !important;
+    }
+    
+    /* 입력 필드 디자인 (배경 흰색, 글자 검정) */
     .stTextInput > div > div > input, 
     .stNumberInput > div > div > input, 
     .stSelectbox > div > div {
@@ -43,13 +47,18 @@ st.markdown("""
         border: 1px solid #dcdcdc;
         border-radius: 4px;
     }
+    /* Selectbox 드롭다운 메뉴 텍스트 색상 */
+    .stSelectbox div[data-baseweb="popover"] div {
+        color: #191919 !important;
+        background-color: #ffffff !important;
+    }
 
-    /* 카드 UI (정보 박스) - 깔끔한 화이트 */
+    /* 카드 UI (정보 박스) */
     .info-card {
         background-color: #ffffff;
         padding: 25px;
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         border: 1px solid #eee;
         margin-bottom: 20px;
     }
@@ -59,10 +68,10 @@ st.markdown("""
     .kpi-value { font-size: 2rem; font-weight: 900; color: #3c1e1e !important; } /* 카카오 브라운 */
     .kpi-sub { font-size: 0.8rem; color: #888 !important; }
 
-    /* 성공 사례 박스 (카카오 톡방 느낌의 연한 노랑) */
+    /* 성공 사례 박스 (연한 노랑) */
     .success-case {
-        background-color: #fffae0; /* 연한 노랑 */
-        border: 1px solid #fee500; /* 카카오 옐로우 */
+        background-color: #fffae0;
+        border: 1px solid #fee500;
         padding: 20px;
         border-radius: 8px;
         margin-bottom: 20px;
@@ -70,8 +79,8 @@ st.markdown("""
 
     /* 버튼 스타일 (카카오 옐로우) */
     .stButton > button {
-        background-color: #fee500 !important; /* 카카오 옐로우 */
-        color: #191919 !important; /* 검정 글씨 */
+        background-color: #fee500 !important;
+        color: #191919 !important;
         font-weight: 800 !important;
         border: none;
         padding: 15px;
@@ -81,7 +90,7 @@ st.markdown("""
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .stButton > button:hover {
-        background-color: #fdd835 !important; /* 호버시 조금 더 진한 노랑 */
+        background-color: #fdd835 !important;
     }
     
     /* 헤더 박스 */
@@ -92,13 +101,13 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* 탭 스타일 */
-    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
-        font-size: 1.1rem;
-        font-weight: bold;
-    }
-    .stTabs [aria-selected="true"] {
-        border-bottom-color: #fee500 !important;
+    /* 경고/알림 박스 텍스트 */
+    .stAlert div { color: #191919 !important; }
+    
+    /* Expander(접이식) 헤더 텍스트 */
+    .streamlit-expanderHeader p {
+        color: #191919 !important;
+        font-weight: 600;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -157,7 +166,7 @@ def calculate_consulting(biz_type, revenue, employee):
 # ==========================================
 with st.sidebar:
     st.markdown("### 🏢 기업 간편 진단")
-    st.markdown("사업자번호만 있으면 1분 안에 한도 조회가 가능합니다.")
+    st.markdown("<p style='font-size:0.9rem; color:#555 !important;'>사업자번호만 있으면 1분 안에 한도 조회가 가능합니다.</p>", unsafe_allow_html=True)
     
     biz_num = st.text_input("사업자등록번호", placeholder="000-00-00000")
     
@@ -215,11 +224,11 @@ if run_btn:
     with k1:
         st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>총 조달 가능액</div><div class='kpi-value'>{result['total']}</div><div class='kpi-sub'>+ 추가 금리 인하</div></div>""", unsafe_allow_html=True)
     with k2:
-        st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>정책자금(융자)</div><div class='kpi-value'>{result['loan']}</div><div class='kpi-sub'>중진공/신보/기보</div></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>정책자금(융자)</div><div class='kpi-value' style='color:#191f28 !important;'>{result['loan']}</div><div class='kpi-sub'>중진공/신보/기보</div></div>""", unsafe_allow_html=True)
     with k3:
-        st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>고용지원금(무상)</div><div class='kpi-value'>{result['hire']}</div><div class='kpi-sub'>청년/특별고용 장려금</div></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>고용지원금(무상)</div><div class='kpi-value' style='color:#191f28 !important;'>{result['hire']}</div><div class='kpi-sub'>청년/특별고용 장려금</div></div>""", unsafe_allow_html=True)
     with k4:
-        st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>예상 세금 절세</div><div class='kpi-value'>{result['tax']}</div><div class='kpi-sub'>법인세/소득세 감면</div></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>예상 세금 절세</div><div class='kpi-value' style='color:#191f28 !important;'>{result['tax']}</div><div class='kpi-sub'>법인세/소득세 감면</div></div>""", unsafe_allow_html=True)
 
     # --- [섹션 2] 성공 사례 매칭 (Reference) ---
     st.markdown("### 🏆 동종 업계 성공 사례 (Reference)")
@@ -227,13 +236,13 @@ if run_btn:
     st.markdown(f"""
     <div class='success-case'>
         <h3 style='color:#3c1e1e !important; margin-top:0;'>❝ 사장님과 유사한 {ref_case['case']} 승인 사례 ❞</h3>
-        <p style='font-size:1.1rem; font-weight:bold;'>💰 총 조달 금액: <span style='color:#d97706; font-size:1.3rem;'>{ref_case['fund']}</span> 승인</p>
+        <p style='font-size:1.1rem; font-weight:bold; color:#333 !important;'>💰 총 조달 금액: <span style='color:#d97706; font-size:1.3rem;'>{ref_case['fund']}</span> 승인</p>
         <hr style='border-color:#e6d35f;'>
-        <ul style='line-height:1.8;'>
+        <ul style='line-height:1.8; color:#333 !important;'>
             <li><strong>[자금 구성]</strong> {ref_case['detail']}</li>
             <li><strong>[성공 키워드]</strong> {ref_case['key']}</li>
         </ul>
-        <p style='font-size:0.9rem; color:#666; margin-top:15px;'>※ 매출액 {c_rev}억 규모 기업의 표준 승인 데이터입니다. 컨설팅 시 98.7% 확률로 승인 가능합니다.</p>
+        <p style='font-size:0.9rem; color:#555 !important; margin-top:15px;'>※ 매출액 {c_rev}억 규모 기업의 표준 승인 데이터입니다. 컨설팅 시 98.7% 확률로 승인 가능합니다.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -244,20 +253,20 @@ if run_btn:
         st.markdown("### 📋 기업 성장 솔루션 제안")
         st.markdown(f"""
         <div class='info-card'>
-            <p><strong>1. 정책자금 (운전/시설)</strong></p>
-            <ul>
+            <p style='color:#191919 !important;'><strong>1. 정책자금 (운전/시설)</strong></p>
+            <ul style='color:#333 !important;'>
                 <li>한국은행 기준금리 연동 저금리 대출 (2~3%대)</li>
                 <li>{c_year}년차 기업 특화자금 (창업기반/도약지원) 매칭</li>
             </ul>
             <br>
-            <p><strong>2. 기업 인증 (스펙업)</strong></p>
-            <ul>
+            <p style='color:#191919 !important;'><strong>2. 기업 인증 (스펙업)</strong></p>
+            <ul style='color:#333 !important;'>
                 <li>{'벤처기업 인증 진행 (법인세 50% 감면 타겟)' if c_type == 'IT/소프트웨어' or c_type == '제조업' else '이노비즈/메인비즈 인증을 통한 신뢰도 확보'}</li>
                 <li>기업부설연구소 설립으로 인건비 세액 공제 (25%)</li>
             </ul>
             <br>
-            <p><strong>3. 리스크 관리</strong></p>
-            <ul>
+            <p style='color:#191919 !important;'><strong>3. 리스크 관리</strong></p>
+            <ul style='color:#333 !important;'>
                 <li>부채비율 관리 및 가지급금 정리 솔루션 제공</li>
                 <li>대표자 신용등급 관리 (NICE/KCB) 가이드</li>
             </ul>
@@ -281,8 +290,8 @@ else:
     # 초기 대기 화면
     st.info("👈 왼쪽 사이드바에 기업 정보를 입력하고 '무료 한도 조회'를 눌러주세요.")
     st.markdown("""
-    <div style='text-align:center; margin-top:50px; color:#ccc;'>
-        <h1>Ready for Analysis</h1>
-        <p>데이터를 입력하면 AI가 3,400개 공고를 스캔합니다.</p>
+    <div style='text-align:center; margin-top:50px;'>
+        <h1 style='color:#ccc !important;'>Waiting for Input...</h1>
+        <p style='color:#999 !important;'>데이터를 입력하면 AI가 3,400개 공고를 스캔합니다.</p>
     </div>
     """, unsafe_allow_html=True)
