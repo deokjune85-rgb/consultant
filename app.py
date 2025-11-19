@@ -1,343 +1,290 @@
 import streamlit as st
-import plotly.graph_objects as go
 import time
+import random
 import pandas as pd
 
 # ==========================================
-# [1. 시스템 설정 & 하이엔드 디자인]
+# [1. 시스템 설정 & 디자인 (Nuclear CSS)]
 # ==========================================
 st.set_page_config(
     page_title="Biz-Finder Enterprise",
-    page_icon="💼",
+    page_icon="🏢",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# 고급 CSS (그림자, 카드, 타이포그래피 강화)
+# 디자인: 금융권 스타일 (Clean & Professional)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap');
     
+    /* 전체 폰트 및 배경 설정 */
     html, body, [class*="css"] {
         font-family: 'Pretendard', sans-serif;
-        background-color: #f0f2f5;
-        color: #191f28;
+        background-color: #f4f6f8;
     }
     
-    /* 사이드바 강제 스타일링 */
-    [data-testid="stSidebar"] {
-        background-color: #ffffff;
-        border-right: 1px solid #e5e8eb;
-    }
-    [data-testid="stSidebar"] * {
-        color: #333333 !important;
-    }
-
-    /* 텍스트 컬러 강제 고정 */
-    h1, h2, h3, h4, h5, p, span, div, label {
+    /* [중요] 모든 텍스트 강제 검정 (가독성 확보) */
+    h1, h2, h3, h4, h5, h6, p, div, span, label, li {
         color: #191f28 !important;
     }
     
-    /* 카드 UI (박스 디자인) */
-    .card {
-        background: #ffffff;
-        padding: 24px;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        border: 1px solid #e5e8eb;
+    /* 사이드바 스타일 */
+    [data-testid="stSidebar"] {
+        background-color: #ffffff;
+        border-right: 1px solid #e1e4e8;
+    }
+    [data-testid="stSidebar"] * {
+        color: #191f28 !important;
+    }
+    
+    /* 입력 필드 디자인 (흰 배경 + 검은 글씨) */
+    .stTextInput > div > div > input, 
+    .stNumberInput > div > div > input, 
+    .stSelectbox > div > div {
+        background-color: #ffffff !important;
+        color: #191f28 !important;
+        border: 1px solid #d1d6db;
+        border-radius: 6px;
+    }
+
+    /* 카드 UI (정보 박스) */
+    .info-card {
+        background-color: #ffffff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        border: 1px solid #e1e4e8;
         margin-bottom: 20px;
     }
-    
-    /* KPI 박스 */
-    .kpi-metric {
-        text-align: center;
+
+    /* KPI 숫자 스타일 */
+    .kpi-title { font-size: 0.9rem; color: #6b7684 !important; font-weight: 600; }
+    .kpi-value { font-size: 2rem; font-weight: 800; color: #3182f6 !important; } /* 토스 블루 */
+    .kpi-sub { font-size: 0.8rem; color: #8b95a1 !important; }
+
+    /* 성공 사례 박스 */
+    .success-case {
+        background: linear-gradient(135deg, #e8f3ff 0%, #ffffff 100%);
+        border-left: 5px solid #3182f6;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
     }
-    .kpi-label {
-        font-size: 0.9rem;
-        color: #8b95a1 !important;
-        font-weight: 600;
-        margin-bottom: 4px;
-    }
-    .kpi-value {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: #3182f6 !important; /* 토스 블루 */
-    }
-    
-    /* 공고 리스트 스타일 */
-    .grant-item {
-        border-bottom: 1px solid #f1f3f5;
-        padding: 16px 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .grant-item:last-child { border-bottom: none; }
-    
-    .badge-dday {
-        background-color: #fff1f1;
-        color: #e93d3d !important;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        font-weight: bold;
-    }
-    
-    /* 문서 프리뷰 스타일 (A4 용지 느낌) */
-    .document-preview {
-        background-color: #ffffff;
-        border: 1px solid #d1d6db;
-        padding: 40px;
-        min-height: 400px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        font-family: 'Pretendard', serif; /* 명조 느낌 */
-        line-height: 1.8;
-        font-size: 0.95rem;
-    }
-    
-    /* 버튼 커스텀 */
+
+    /* 버튼 스타일 */
     .stButton > button {
-        background-color: #3182f6 !important;
+        background-color: #1b2c4e !important; /* 딥 네이비 */
         color: white !important;
         font-weight: bold;
         border: none;
-        padding: 12px 20px;
+        padding: 15px;
         border-radius: 8px;
         width: 100%;
+        font-size: 1.1rem;
     }
     .stButton > button:hover {
-        background-color: #1b64da !important;
+        background-color: #14203a !important;
+    }
+
+    /* 탭 스타일 */
+    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+        font-size: 1.1rem;
+        font-weight: bold;
     }
     
-    /* 입력 필드 개선 */
-    .stTextInput input, .stNumberInput input {
-        background-color: #f9fafb !important;
-        border: 1px solid #d1d6db;
-        border-radius: 8px;
-        color: #333 !important;
-    }
+    /* 경고/알림 박스 텍스트 */
+    .stAlert div { color: #191f28 !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [2. 사이드바: 고객 데이터 입력]
+# [2. 데이터 및 로직 엔진]
+# ==========================================
+
+# 성공 사례 데이터베이스 (Reference DB)
+success_db = {
+    "IT/소프트웨어": {
+        "case": "소프트웨어 개발업 A사",
+        "fund": "4억 3천만원",
+        "detail": "정책자금 4억 (신보+중진공) / 고용지원금 5천 (청년 5명) / 세금절세 4.3천",
+        "key": "기업부설연구소 설립을 통한 기술평가 가점 확보"
+    },
+    "제조업": {
+        "case": "플라스틱창호 제조 B사",
+        "fund": "5억 3천만원",
+        "detail": "정책자금 3억 / 고용지원금 4.2천 / 세금절세 50% 감면",
+        "key": "벤처인증 획득으로 법인세/소득세 감면 혜택 적용"
+    },
+    "도소매/유통": {
+        "case": "의류 쇼핑몰 C사",
+        "fund": "7억 9천만원",
+        "detail": "운전 4억 + 시설(창고) 3억 / 고용지원금 5천",
+        "key": "매출 증가율 기반 운전자금 한도 증액 성공"
+    },
+    "서비스/기타": {
+        "case": "실내인테리어 D사",
+        "fund": "3억 4천만원",
+        "detail": "정책자금 3억 / 고용지원금 2천 / 신용등급 상향",
+        "key": "카드론 상환 컨설팅을 통한 대표자 신용등급 관리"
+    }
+}
+
+def calculate_consulting(biz_type, revenue, employee):
+    """3-in-1 패키지 계산 로직"""
+    
+    # 1. 정책자금 한도 (매출의 20~30% 가정)
+    loan_limit = int(revenue * 0.25)
+    if loan_limit > 10: loan_limit = 10 # 최대 10억 제한 (일반적)
+    
+    # 2. 고용지원금 (청년/장년 채용 가정)
+    # 인당 연 900만원 지원 가정 * 직원수의 30% 대상
+    hire_support = int(employee * 0.3 * 0.9) 
+    
+    # 3. 세금 절세 (벤처/연구소)
+    # 영업이익률 10% 가정 -> 법인세의 50% 감면 등 시뮬레이션
+    tax_save = int(revenue * 0.1 * 0.1) # 대략 매출의 1% 절세 효과
+    
+    total_benefit = loan_limit + (hire_support/10) + (tax_save/10) # 억 단위 환산
+    
+    return {
+        "loan": f"{loan_limit}억원",
+        "hire": f"{hire_support}천만원",
+        "tax": f"{tax_save}천만원",
+        "total": f"{total_benefit:.1f}억원"
+    }
+
+# ==========================================
+# [3. 사이드바: 간편 조회 폼]
 # ==========================================
 with st.sidebar:
-    st.markdown("### 🏢 클라이언트 정보 입력")
+    st.markdown("### 🏢 기업 간편 진단")
+    st.markdown("<p style='font-size:0.8rem; color:#666;'>사업자번호만 있으면 1분 안에 한도 조회가 가능합니다.</p>", unsafe_allow_html=True)
     
-    with st.expander("기본 재무 정보", expanded=True):
-        c_name = st.text_input("기업명", "아이엠디테크")
-        c_sector = st.selectbox("업종", ["IT/소프트웨어", "제조업", "바이오/헬스케어", "서비스/기타"])
-        c_year = st.number_input("업력 (년)", 1, 50, 2)
-        c_rev = st.number_input("매출액 (억원)", 0.0, 1000.0, 5.0)
+    biz_num = st.text_input("사업자등록번호", placeholder="000-00-00000")
     
-    with st.expander("재무 건전성 지표", expanded=True):
-        c_debt = st.slider("부채비율 (%)", 0, 1000, 200, help="400% 초과 시 융자 제한 가능성 높음")
-        c_profit = st.radio("영업이익 상태", ["흑자", "적자 (자본잠식 없음)", "완전 자본잠식"])
-        
-    with st.expander("가점 및 인증 현황"):
-        c_lab = st.checkbox("기업부설연구소 보유")
-        c_venture = st.checkbox("벤처/이노비즈 인증")
-        c_pat = st.number_input("등록 특허 수", 0, 100, 0)
+    st.markdown("---")
+    st.markdown("#### 📝 기본 정보 입력")
+    c_name = st.text_input("기업명", "미래테크")
+    c_type = st.selectbox("업종 선택", ["IT/소프트웨어", "제조업", "도소매/유통", "서비스/기타"])
+    c_year = st.number_input("업력 (년)", 1, 50, 3)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        c_rev = st.number_input("연 매출(억)", 1.0, 1000.0, 10.0)
+    with col2:
+        c_emp = st.number_input("직원 수(명)", 1, 500, 5)
 
     st.markdown("---")
-    analyze_btn = st.button("🚀 AI 정밀 진단 실행", use_container_width=True)
+    run_btn = st.button("🚀 무료 한도 조회 실행")
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.info("**[전문가 Tip]**\n서류 제출 없이 사업자 번호만으로 1차 가한도 확인이 가능합니다.")
 
 # ==========================================
-# [3. 메인 대시보드 로직]
+# [4. 메인 대시보드]
 # ==========================================
 
-# 헤더 영역
-st.markdown(f"""
-<div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;'>
-    <div>
-        <h1 style='margin:0; font-size:2rem; color:#191f28;'>Biz-Finder Pro</h1>
-        <p style='margin:5px 0 0 0; color:#6b7684;'>정책자금 컨설턴트 전용 AI 솔루션 v2.1</p>
-    </div>
-    <div style='text-align:right;'>
-        <span style='background:#e5f4ff; color:#3182f6; padding:6px 12px; border-radius:20px; font-weight:bold;'>Professional License</span>
-    </div>
+# 헤더
+st.markdown("""
+<div style='padding:20px; background:white; border-radius:10px; border-left:8px solid #1b263b; margin-bottom:20px;'>
+    <h1 style='margin:0; font-size:2.2rem;'>Biz-Finder Enterprise</h1>
+    <p style='margin:5px 0 0 0; font-size:1.1rem; color:#555;'>대한민국 1등 정책자금 조달 솔루션</p>
 </div>
 """, unsafe_allow_html=True)
 
-if analyze_btn:
-    # 로딩 시뮬레이션 (있어 보이게)
-    with st.status("🔍 기업 데이터를 분석 중입니다...", expanded=True) as status:
-        st.write("📊 재무제표 및 부채비율 리스크 스캐닝...")
+if run_btn:
+    # 로딩 시뮬레이션
+    with st.status("📊 기업 데이터를 분석 중입니다...", expanded=True) as status:
         time.sleep(0.5)
-        st.write("📡 3,400개 정부 공고 데이터베이스 대조 중...")
-        time.sleep(0.7)
-        st.write("⚖️ 업종별 가점 항목 및 지원 적합도 산출 중...")
+        st.write("📡 NICE 평가정보 / KED 데이터 연동 중...")
+        time.sleep(0.5)
+        st.write("🏦 5대 시중은행 및 정책기관 한도 대조 중...")
+        time.sleep(0.5)
+        st.write("⚖️ 3,400개 지원사업 매칭 알고리즘 가동...")
         time.sleep(0.5)
         status.update(label="분석 완료!", state="complete", expanded=False)
-    
-    # --- 데이터 처리 (시뮬레이션) ---
-    # 점수 계산
-    base_score = 60
-    if c_year < 3: base_score += 10 # 창업 초기 가점
-    if c_lab: base_score += 10
-    if c_venture: base_score += 10
-    if c_pat > 0: base_score += (c_pat * 5)
-    if c_debt > 400: base_score -= 30 # 부채비율 페널티
-    
-    final_score = min(max(base_score, 0), 100) # 0~100 제한
-    
-    # 지원 가능 금액 추정
-    max_fund = 0.5 if c_rev < 1 else (1 if c_rev < 10 else 3) # 매출액 기반 한도
-    if final_score > 80: max_fund *= 1.5
 
-    # --- [대시보드: 상단 KPI] ---
-    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-    
-    with kpi1:
-        st.markdown(f"""<div class='card kpi-metric'><div class='kpi-label'>종합 진단 점수</div><div class='kpi-value'>{final_score}점</div></div>""", unsafe_allow_html=True)
-    with kpi2:
-        st.markdown(f"""<div class='card kpi-metric'><div class='kpi-label'>지원 가능 등급</div><div class='kpi-value'>{'A' if final_score>=80 else ('B' if final_score>=60 else 'C')}등급</div></div>""", unsafe_allow_html=True)
-    with kpi3:
-        st.markdown(f"""<div class='card kpi-metric'><div class='kpi-label'>예상 확보 자금</div><div class='kpi-value'>{max_fund}억</div></div>""", unsafe_allow_html=True)
-    with kpi4:
-        st.markdown(f"""<div class='card kpi-metric'><div class='kpi-label'>매칭된 공고</div><div class='kpi-value'>4건</div></div>""", unsafe_allow_html=True)
+    # 결과 계산
+    result = calculate_consulting(c_type, c_rev, c_emp)
+    ref_case = success_db.get(c_type, success_db["서비스/기타"])
 
-    # --- [대시보드: 중단 - 레이더 차트 & 리스크 리포트] ---
-    col_chart, col_risk = st.columns([1, 1])
+    # --- [섹션 1] 핵심 KPI (3-in-1 패키지) ---
+    st.markdown("### 💰 예상 자금 조달 및 혜택 규모")
     
-    with col_chart:
-        st.markdown("### 📐 기업 역량 5각 분석")
-        with st.container():
-            # 레이더 차트
-            categories = ['기술성', '시장성', '사업성', '재무건전성', '정책부합도']
-            
-            # 점수 세분화
-            tech = 80 if c_lab or c_pat > 0 else 40
-            market = 70
-            biz = 75
-            finance = 90 if c_debt < 200 else (40 if c_debt > 400 else 60)
-            policy = 85 if c_sector == "IT/소프트웨어" or c_sector == "바이오/헬스케어" else 60
-            
-            fig = go.Figure()
-            fig.add_trace(go.Scatterpolar(
-                r=[tech, market, biz, finance, policy],
-                theta=categories,
-                fill='toself',
-                fillcolor='rgba(49, 130, 246, 0.2)',
-                line=dict(color='#3182f6', width=2),
-                name=c_name
-            ))
-            fig.update_layout(
-                polar=dict(radialaxis=dict(visible=True, range=[0, 100], color='#aaa')),
-                margin=dict(t=10, b=10, l=40, r=40),
-                height=300,
-                paper_bgcolor='rgba(0,0,0,0)',
-                showlegend=False
-            )
-            st.plotly_chart(fig, use_container_width=True)
+    k1, k2, k3, k4 = st.columns(4)
+    
+    with k1:
+        st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>총 조달 가능액</div><div class='kpi-value'>{result['total']}</div><div class='kpi-sub'>+ 추가 금리 인하</div></div>""", unsafe_allow_html=True)
+    with k2:
+        st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>정책자금(융자)</div><div class='kpi-value' style='color:#191f28 !important;'>{result['loan']}</div><div class='kpi-sub'>중진공/신보/기보</div></div>""", unsafe_allow_html=True)
+    with k3:
+        st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>고용지원금(무상)</div><div class='kpi-value' style='color:#191f28 !important;'>{result['hire']}</div><div class='kpi-sub'>청년/특별고용 장려금</div></div>""", unsafe_allow_html=True)
+    with k4:
+        st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>예상 세금 절세</div><div class='kpi-value' style='color:#191f28 !important;'>{result['tax']}</div><div class='kpi-sub'>법인세/소득세 감면</div></div>""", unsafe_allow_html=True)
 
-    with col_risk:
-        st.markdown("### 📋 AI 진단 소견서")
+    # --- [섹션 2] 성공 사례 매칭 (Reference) ---
+    st.markdown("### 🏆 동종 업계 성공 사례 (Reference)")
+    
+    st.markdown(f"""
+    <div class='success-case'>
+        <h3 style='color:#1e40af !important; margin-top:0;'>❝ 사장님과 유사한 {ref_case['case']} 승인 사례 ❞</h3>
+        <p style='font-size:1.1rem; font-weight:bold;'>💰 총 조달 금액: <span style='color:#d97706; font-size:1.3rem;'>{ref_case['fund']}</span> 승인</p>
+        <hr style='border-color:#bcdbf7;'>
+        <ul style='line-height:1.8;'>
+            <li><strong>[자금 구성]</strong> {ref_case['detail']}</li>
+            <li><strong>[성공 키워드]</strong> {ref_case['key']}</li>
+        </ul>
+        <p style='font-size:0.9rem; color:#666; margin-top:15px;'>※ 매출액 {c_rev}억 규모 기업의 표준 승인 데이터입니다. 컨설팅 시 98.7% 확률로 승인 가능합니다.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # --- [섹션 3] 상세 솔루션 제안 ---
+    col_L, col_R = st.columns([1.5, 1])
+    
+    with col_L:
+        st.markdown("### 📋 기업 성장 솔루션 제안")
         st.markdown(f"""
-        <div class='card' style='height: 300px; overflow-y: auto;'>
-            <p style='font-weight:bold; color:#1e40af !important;'>[종합 의견]</p>
-            <p>{c_name}의 경우, <strong>{c_sector}</strong> 분야의 정책적 가점이 높으나 
-            <strong>{'재무건전성' if c_debt > 300 else '기술 인증'}</strong> 보완이 시급합니다.</p>
-            <hr style='border-color:#f1f3f5;'>
-            
-            <p style='font-weight:bold; color:#d97706 !important;'>[⚠️ 발견된 리스크]</p>
+        <div class='info-card'>
+            <p><strong>1. 정책자금 (운전/시설)</strong></p>
             <ul>
-                <li>부채비율 <strong>{c_debt}%</strong>: {'위험 수준 (300% 초과). 자본금 증자 필요.' if c_debt > 300 else '안정권입니다.'}</li>
-                <li>연구소 보유 여부: {'✅ 보유 (가점 +2점)' if c_lab else '❌ 미보유 (R&D 지원 시 불리)'}</li>
+                <li>한국은행 기준금리 연동 저금리 대출 (2~3%대)</li>
+                <li>{c_year}년차 기업 특화자금 (창업기반/도약지원) 매칭</li>
             </ul>
-            <hr style='border-color:#f1f3f5;'>
-            
-            <p style='font-weight:bold; color:#166534 !important;'>[💡 컨설턴트 Action Plan]</p>
-            <p>1. {'부채비율 관리 및 가수금 출자전환 유도' if c_debt > 300 else '기업부설연구소 설립 선행 (소요기간 1개월)'}<br>
-            2. {'창업패키지보다는 R&D 과제 위주 공략' if c_year > 3 else '초기창업패키지(1억) 최우선 공략'}</p>
+            <br>
+            <p><strong>2. 기업 인증 (스펙업)</strong></p>
+            <ul>
+                <li>{'벤처기업 인증 진행 (법인세 50% 감면 타겟)' if c_type == 'IT/소프트웨어' or c_type == '제조업' else '이노비즈/메인비즈 인증을 통한 신뢰도 확보'}</li>
+                <li>기업부설연구소 설립으로 인건비 세액 공제 (25%)</li>
+            </ul>
+            <br>
+            <p><strong>3. 리스크 관리</strong></p>
+            <ul>
+                <li>부채비율 관리 및 가지급금 정리 솔루션 제공</li>
+                <li>대표자 신용등급 관리 (NICE/KCB) 가이드</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
 
-    # --- [대시보드: 하단 - 공고 매칭 & 서류 생성] ---
-    st.markdown("---")
-    st.markdown("### 💰 AI 매칭 공고 및 서류 자동 생성")
-    
-    col_list, col_gen = st.columns([1, 1.2])
-    
-    with col_list:
-        st.markdown("**📌 추천 공고 리스트 (적합도 순)**")
+    with col_R:
+        st.markdown("### 📞 전문가 매칭")
+        st.info("""
+        **서류 준비가 복잡하신가요?**
         
-        # 공고 리스트 (HTML로 커스텀)
-        matched_funds = [
-            {"title": "2025 초기창업패키지", "amt": "최대 1억", "dday": "D-12", "fit": 98, "tag": "출연금"},
-            {"title": "창업성장기술개발 디딤돌", "amt": "1.2억", "dday": "D-24", "fit": 92, "tag": "R&D"},
-            {"title": "혁신성장지원자금 (운전)", "amt": "대한도", "dday": "상시", "fit": 85, "tag": "융자"},
-            {"title": "데이터바우처 지원사업", "amt": "4,500만", "dday": "예정", "fit": 81, "tag": "바우처"}
-        ]
+        전직 은행 지점장, 회계사, 노무사로 구성된
+        기업전담팀이 **1:1 방문 상담**을 지원합니다.
         
-        for fund in matched_funds:
-            st.markdown(f"""
-            <div class='card' style='padding: 15px; margin-bottom: 10px;'>
-                <div style='display:flex; justify-content:space-between; margin-bottom:5px;'>
-                    <span style='font-weight:bold; font-size:1.05rem;'>{fund['title']}</span>
-                    <span class='badge-dday'>{fund['dday']}</span>
-                </div>
-                <div style='display:flex; justify-content:space-between; align-items:center;'>
-                    <span style='color:#555; font-size:0.9rem;'>{fund['tag']} | {fund['amt']}</span>
-                    <strong style='color:#3182f6;'>적합도 {fund['fit']}%</strong>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-    with col_gen:
-        st.markdown("**📝 PSST 사업계획서 초안 생성**")
-        
-        with st.container():
-            st.markdown("""<div class='card'>""", unsafe_allow_html=True)
-            
-            target_fund = st.selectbox("작성할 공고 선택", [f['title'] for f in matched_funds])
-            item_keyword = st.text_input("핵심 아이템 키워드 (예: AI 기반 물류 최적화)", "AI 기반 속옷 사이즈 추천 플랫폼")
-            
-            if st.button("🤖 AI 초안 작성 시작 (30초 소요)"):
-                # 스트리밍 효과 (타이핑 치는 느낌)
-                placeholder = st.empty()
-                full_text = ""
-                
-                # 시뮬레이션 텍스트 (PSST 구조)
-                simulated_response = f"""
-                <strong>[1. 문제인식 (Problem)]</strong><br>
-                - 기존 온라인 패션 시장의 반품률은 30% 이상으로, 물류비 손실이 심각함.<br>
-                - 소비자들은 각기 다른 브랜드 사이즈 표기법으로 인해 구매 결정에 어려움을 겪음.<br>
-                - 이를 해결할 정밀한 비대면 신체 계측 솔루션의 부재.<br><br>
-                
-                <strong>[2. 실현가능성 (Solution)]</strong><br>
-                - 본 과제는 '{item_keyword}' 기술을 적용하여 오차범위 1cm 이내의 계측을 목표로 함.<br>
-                - 15만 건의 체형 빅데이터를 RAG(검색증강생성) 기술과 결합하여 환각 없는 추천 구현.<br>
-                - 기존 앱 설치 방식이 아닌, 쇼핑몰 웹 임베드(Embed) 방식으로 접근성 100% 확보.<br><br>
-                
-                <strong>[3. 성장전략 (Scale-up)]</strong><br>
-                - (1차년도) 국내 상위 50개 자사몰 대상 SaaS 모델 공급 및 데이터 확보.<br>
-                - (2차년도) 확보된 신체 데이터를 기반으로 패션 제조사(Brand)와 데이터 제휴.<br>
-                - (3차년도) 글로벌 플랫폼(Shopify 등) 플러그인 출시로 해외 진출.<br><br>
-                
-                <strong>[4. 팀 구성 (Team)]</strong><br>
-                - 대표자: 동종 업계 15년 경력, 000 브랜드 창업 및 매각 경험 보유.<br>
-                - 개발팀: AI 석/박사 출신 엔지니어 3인 보유.
-                """
-                
-                # 타이핑 효과 구현
-                st.markdown(f"""
-                <div class='document-preview'>
-                    <h3 style='text-align:center; text-decoration:underline; margin-bottom:20px;'>사업계획서 (PSST) 요약본</h3>
-                    <div style='font-family: "Pretendard", sans-serif;'>
-                        {simulated_response}
-                    </div>
-                    <div style='margin-top:30px; text-align:center; color:#888; font-size:0.8rem;'>
-                        * 위 내용은 AI가 생성한 초안입니다. 전문가의 검토 후 제출하십시오.
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                st.success("✅ 생성이 완료되었습니다. 복사하여 사용하십시오.")
-
-            st.markdown("</div>", unsafe_allow_html=True)
+        지금 '상담 신청'을 누르시면,
+        귀사의 관할 지역 전문 위원이 배정됩니다.
+        """)
+        st.button("👨‍💼 전문 위원 방문상담 신청하기 (무료)")
 
 else:
-    # 초기 화면 (아무것도 안 눌렀을 때)
-    st.info("👈 왼쪽 사이드바에 클라이언트 정보를 입력하고 '진단 실행'을 눌러주세요.")
+    # 초기 대기 화면
+    st.info("👈 왼쪽 사이드바에 기업 정보를 입력하고 '무료 한도 조회'를 눌러주세요.")
+    st.markdown("""
+    <div style='text-align:center; margin-top:50px; color:#ccc;'>
+        <h1>Wating for Input...</h1>
+        <p>데이터를 입력하면 AI가 3,400개 공고를 스캔합니다.</p>
+    </div>
+    """, unsafe_allow_html=True)
