@@ -5,7 +5,7 @@ import random
 import pandas as pd
 
 # ==========================================
-# [1. 시스템 설정 & 강제 화이트 모드 (Nuclear CSS)]
+# [1. 시스템 설정 & 강제 화이트 모드]
 # ==========================================
 st.set_page_config(
     page_title="Biz-Finder Enterprise",
@@ -25,17 +25,16 @@ st.markdown("""
         background-color: #ffffff;
     }
 
-    /* [핵심 1] 배경 무조건 화이트 (시스템 테마 무시) */
+    /* [핵심] 배경 무조건 화이트 & 글자 무조건 검정 */
     [data-testid="stAppViewContainer"] { background-color: #ffffff !important; }
     [data-testid="stHeader"] { background-color: #ffffff !important; }
     [data-testid="stSidebar"] { background-color: #f7f7f7 !important; border-right: 1px solid #ececec; }
     
-    /* [핵심 2] 모든 텍스트 무조건 검정 (예외 없음) */
     h1, h2, h3, h4, h5, h6, p, div, span, label, li, td, th {
         color: #191919 !important;
     }
     
-    /* [핵심 3] 입력창(Input) 강제 스타일링 (배경 흰색, 글자 검정) */
+    /* 입력창 강제 스타일링 */
     .stTextInput input, .stNumberInput input, .stSelectbox div, .stTextArea textarea {
         background-color: #ffffff !important;
         color: #000000 !important;
@@ -43,80 +42,25 @@ st.markdown("""
         border-color: #dcdcdc !important;
     }
     
-    /* 입력창 라벨 텍스트 색상 */
+    /* 입력창 라벨 */
     .stTextInput label p, .stNumberInput label p, .stSelectbox label p, .stTextArea label p {
         color: #191919 !important;
         font-weight: 600 !important;
     }
 
-    /* 카드 UI (정보 박스) */
+    /* 카드 UI */
     .info-card {
         background-color: #ffffff;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 20px;
+        border-radius: 10px;
         border: 1px solid #eee;
-        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        margin-bottom: 15px;
     }
 
-    /* KPI 숫자 스타일 */
-    .kpi-title { font-size: 0.9rem; color: #666 !important; font-weight: 600; }
+    /* KPI 숫자 */
     .kpi-value { font-size: 2rem; font-weight: 900; color: #3c1e1e !important; } /* 카카오 브라운 */
-    .kpi-sub { font-size: 0.8rem; color: #888 !important; }
-
-    /* 성공 사례 박스 */
-    .success-case {
-        background-color: #fffae0;
-        border: 1px solid #fee500;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
     
-    /* DNA 분석 카드 */
-    .dna-card {
-        background-color: #f9f9f9;
-        border-left: 6px solid #3c1e1e;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
-    
-    /* 리스크/기회 박스 */
-    .alert-box-risk {
-        background-color: #fff5f5;
-        border: 1px solid #ffcccc;
-        color: #c53030 !important;
-        padding: 15px;
-        border-radius: 8px;
-        font-weight: bold;
-    }
-    .alert-box-opp {
-        background-color: #f0fff4;
-        border: 1px solid #c6f6d5;
-        color: #2f855a !important;
-        padding: 15px;
-        border-radius: 8px;
-        font-weight: bold;
-    }
-
-    /* 페르소나 문서 박스 (A4 용지 느낌) */
-    .doc-paper {
-        background-color: #fff;
-        border: 1px solid #ddd;
-        padding: 40px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        min-height: 600px;
-        font-family: 'Noto Serif KR', serif; /* 명조체 느낌 */
-        line-height: 1.8;
-        font-size: 1rem;
-        border-radius: 2px;
-    }
-    /* 문서 내부 텍스트 강제 검정 */
-    .doc-paper strong, .doc-paper p, .doc-paper div, .doc-paper h3, .doc-paper h4, .doc-paper h2 {
-        color: #000000 !important;
-    }
-
     /* 버튼 스타일 (카카오 옐로우) */
     .stButton > button {
         background-color: #fee500 !important;
@@ -126,31 +70,24 @@ st.markdown("""
         padding: 15px;
         border-radius: 6px;
         width: 100%;
-        font-size: 1.1rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .stButton > button:hover {
         background-color: #fdd835 !important;
     }
     
-    /* 헤더 박스 */
-    .header-box {
-        padding: 20px;
-        background-color: #ffffff;
-        border-bottom: 3px solid #fee500;
-        margin-bottom: 20px;
+    /* 문서 스타일 */
+    .doc-paper {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        padding: 40px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        min-height: 600px;
+        font-family: 'Noto Serif KR', serif;
+        line-height: 1.8;
+        font-size: 1rem;
     }
 
-    /* 기타 위젯 텍스트 */
-    .stAlert div { color: #191919 !important; }
-    .streamlit-expanderHeader p { color: #191919 !important; font-weight: 600; }
-    
     /* 탭 스타일 */
-    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
-        font-size: 1.1rem;
-        font-weight: bold;
-        color: #191919 !important;
-    }
     .stTabs [aria-selected="true"] {
         border-bottom-color: #fee500 !important;
     }
@@ -158,85 +95,54 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [2. 데이터 및 로직 엔진]
+# [2. 로직 엔진 (Financial & Profiler & Ghostwriter)]
 # ==========================================
 
-# 세션 상태 초기화 (화면 튕김 방지)
-if 'run_analysis' not in st.session_state:
-    st.session_state.run_analysis = False
-
-# 성공 사례 데이터베이스
+# 성공 사례 DB
 success_db = {
-    "IT/소프트웨어": {
-        "case": "소프트웨어 개발업 A사",
-        "fund": "4억 3천만원",
-        "detail": "정책자금 4억 (신보+중진공) / 고용지원금 5천 / 세금절세 4.3천",
-        "key": "기업부설연구소 설립을 통한 기술평가 가점 확보"
-    },
-    "제조업": {
-        "case": "플라스틱창호 제조 B사",
-        "fund": "5억 3천만원",
-        "detail": "정책자금 3억 / 고용지원금 4.2천 / 세금절세 50% 감면",
-        "key": "벤처인증 획득으로 법인세/소득세 감면 혜택 적용"
-    },
-    "도소매/유통": {
-        "case": "의류 쇼핑몰 C사",
-        "fund": "7억 9천만원",
-        "detail": "운전 4억 + 시설(창고) 3억 / 고용지원금 5천",
-        "key": "매출 증가율 기반 운전자금 한도 증액 성공"
-    },
-    "서비스/기타": {
-        "case": "실내인테리어 D사",
-        "fund": "3억 4천만원",
-        "detail": "정책자금 3억 / 고용지원금 2천 / 신용등급 상향",
-        "key": "카드론 상환 컨설팅을 통한 대표자 신용등급 관리"
-    }
+    "IT/소프트웨어": {"case": "SW개발 A사", "fund": "4.3억원", "key": "기업부설연구소"},
+    "제조업": {"case": "부품제조 B사", "fund": "5.3억원", "key": "벤처인증"},
+    "도소매/유통": {"case": "의류몰 C사", "fund": "7.9억원", "key": "매출성장"},
+    "서비스/기타": {"case": "인테리어 D사", "fund": "3.4억원", "key": "신용관리"}
 }
 
+# 재무 계산 로직
 def calculate_consulting(revenue, employee):
-    """3-in-1 패키지 계산 로직 (순수 숫자 반환)"""
     loan_limit = int(revenue * 0.25)
-    if loan_limit > 10: loan_limit = 10 
-    
-    hire_support = int(employee * 0.3 * 0.9) 
-    tax_save = int(revenue * 0.1 * 0.1) 
-    
-    # 억 단위 환산 (float)
-    total_benefit = loan_limit + (hire_support/10) + (tax_save/10)
-    
-    return loan_limit, hire_support, tax_save, total_benefit
+    if loan_limit > 10: loan_limit = 10
+    hire_support = int(employee * 0.3 * 0.9)
+    tax_save = int(revenue * 0.1 * 0.1)
+    total = loan_limit + (hire_support/10) + (tax_save/10)
+    return loan_limit, hire_support, tax_save, total
 
+# DNA 프로파일링 로직
 def analyze_dna(text):
-    """DNA 프로파일링 로직"""
     dna_type = "안정지향 일반형"
     risk = []
     opportunity = []
     
-    if "돈" in text or "자금" in text or "대출" in text:
+    if "돈" in text or "자금" in text:
         risk.append("현금 유동성 부족 (Cash-flow Warning)")
         dna_type = "기술 중심 흙수저형 (R&D-Rich, Cash-Poor)"
-    if "담보" in text or "꽉" in text:
-        risk.append("보증 한도 초과 예상 (신보/기보 거절 가능성 높음)")
+    if "담보" in text or "대출" in text:
+        risk.append("보증 한도 초과 우려 (신보/기보 우회 필요)")
     
-    if "특허" in text or "기술" in text:
-        opportunity.append("기술 가산점 확보 가능 (기술평가 우대)")
-    if "수출" in text or "글로벌" in text:
-        opportunity.append("글로벌 진출 지원사업 적합")
-    if "직원" in text or "채용" in text:
-        opportunity.append("고용연계형 R&D 가산점 대상")
-
-    if not risk: risk.append("특이 리스크 미발견")
+    if "특허" in text: opportunity.append("기술평가 우수기업 가점 대상")
+    if "수출" in text: opportunity.append("글로벌 진출 지원사업 적합")
+    
+    if not risk: risk.append("특이 재무 리스크 미발견")
     if not opportunity: opportunity.append("보편적 사업 구조")
     
     return dna_type, risk, opportunity
 
-def generate_dynamic_psst(industry, item_name, target, strength):
-    """PSST 동적 생성 엔진"""
+# ★★★ [수정된 핵심] High-Fidelity PSST 생성 함수 (이름 통일됨) ★★★
+def generate_real_psst(industry, item_name, target, strength):
+    """정부 사업계획서 표준 문체 생성 엔진"""
     
     # 1. Problem
     problem = f"""
-    <div style="margin-bottom: 15px;">
-        <h4 style="color:#191919; font-weight:bold; margin-bottom:5px;">1-1. 개발 동기 및 필요성</h4>
+    <div style="margin-bottom: 20px;">
+        <h4 style="color:#191919; font-weight:bold; border-bottom:2px solid #333; padding-bottom:5px;">1-1. 개발 동기 및 필요성</h4>
         <p><strong>□ {target} 시장의 구조적 비효율과 디지털 전환(DX)의 지체</strong><br>
         ◦ 현재 {industry} 시장은 노동 집약적이고 아날로그적인 프로세스에 의존하고 있어, 
           데이터 누락 및 인적 오류(Human Error)로 인한 연간 손실액이 증가하는 추세임.<br>
@@ -244,42 +150,30 @@ def generate_dynamic_psst(industry, item_name, target, strength):
           자금력이 부족한 중소기업 및 소상공인의 접근이 원천적으로 차단되어 있음.</p>
         <p><strong>□ '{item_name}' 도입을 통한 시장 패러다임 전환 시급</strong><br>
         ◦ 단순한 기능 개선이 아닌, 데이터 기반의 의사결정 구조를 확립하기 위해서는 
-          '{item_name}'과 같은 혁신적 솔루션 도입이 필수적임.<br>
-        ◦ 글로벌 시장에서는 이미 AI 및 빅데이터를 활용한 최적화가 표준이 되고 있으나, 
-          국내 기술 수준은 이에 미치지 못해 기술 종속 및 해외 자본 유출이 우려되는 상황임.</p>
+          '{item_name}'과 같은 혁신적 솔루션 도입이 필수적임.</p>
     </div>
     """
 
     # 2. Solution
     solution = f"""
-    <div style="margin-bottom: 15px;">
-        <h4 style="color:#191919; font-weight:bold; margin-bottom:5px;">2-1. 기술적 차별성 및 독창성</h4>
+    <div style="margin-bottom: 20px;">
+        <h4 style="color:#191919; font-weight:bold; border-bottom:2px solid #333; padding-bottom:5px;">2-1. 기술적 차별성 및 독창성</h4>
         <p><strong>□ 고도화된 알고리즘 적용을 통한 기술적 해자(Moat) 구축</strong><br>
         ◦ 경쟁사들이 단순 규칙(Rule-base) 기반의 매칭을 제공하는 것과 달리, 
           당사는 비정형 데이터를 벡터화하여 분석하는 고도화된 알고리즘을 적용함.<br>
         ◦ 핵심 강점인 <strong>'{strength}'</strong> 기술을 통해 데이터 처리 속도를 200% 향상시켰으며, 
           이를 통해 실시간 리스크 분석 및 최적화 제안이 가능함 (특허 출원 준비 중).</p>
-        <h4 style='color:#191919; font-weight:bold; margin-top:10px; margin-bottom:5px;'>2-2. 사업화 실현 방안</h4>
-        <p><strong>□ SaaS(서비스형 소프트웨어) 모델을 통한 초기 시장 진입</strong><br>
-        ◦ 초기 도입 비용(Capex)을 0원으로 낮추고, 월 구독료(Opex) 모델을 채택하여 
-          가격 저항성을 최소화하고 <strong>{target}</strong> 고객군을 빠르게 확보함.<br>
-        ◦ 웹/앱 하이브리드 아키텍처를 통해 별도의 설치 없이 즉시 사용 가능한 환경을 제공하여 
-          사용자 편의성(UX)을 극대화함.</p>
     </div>
     """
 
     # 3. Scale-up
     scaleup = f"""
-    <div style="margin-bottom: 15px;">
-        <h4 style="color:#191919; font-weight:bold; margin-bottom:5px;">3-1. 내수 시장 확보 전략 (Traction)</h4>
+    <div style="margin-bottom: 20px;">
+        <h4 style="color:#191919; font-weight:bold; border-bottom:2px solid #333; padding-bottom:5px;">3-1. 사업화 및 성장 전략</h4>
         <p><strong>□ 1단계: 거점 확보 (Targeting)</strong><br>
         - 수도권 내 {industry} 밀집 지역을 중심으로 테스트베드(Test-bed)를 구축하고, 
           베타 서비스를 통해 실증 데이터(Log Data)를 확보하여 알고리즘을 고도화함.<br>
-        <strong>□ 2단계: 바이럴 및 제휴 (Expansion)</strong><br>
-        - 관련 협회 및 커뮤니티와의 MOU를 통해 B2B 판로를 개척하고, 
-          성공 사례(Best Practice)를 홍보하여 시장 점유율을 15%까지 확대함.</p>
-        <h4 style='color:#191919; font-weight:bold; margin-top:10px; margin-bottom:5px;'>3-2. 글로벌 진출 전략</h4>
-        <p><strong>□ K-솔루션의 현지화 (Localization)</strong><br>
+        <strong>□ 2단계: 글로벌 진출 (Global)</strong><br>
         - 3차년도부터 동남아/북미 시장의 특성을 반영한 현지화 버전을 출시하고, 
           글로벌 클라우드 마켓플레이스(AWS, Azure)에 입점하여 해외 매출 비중을 30%까지 확대함.</p>
     </div>
@@ -287,46 +181,29 @@ def generate_dynamic_psst(industry, item_name, target, strength):
 
     # 4. Team
     team = f"""
-    <div style="margin-bottom: 15px;">
-        <h4 style="color:#191919; font-weight:bold; margin-bottom:5px;">4-1. 대표자 및 핵심 인력 역량</h4>
+    <div style="margin-bottom: 20px;">
+        <h4 style="color:#191919; font-weight:bold; border-bottom:2px solid #333; padding-bottom:5px;">4-1. 대표자 및 핵심 인력 역량</h4>
         <p><strong>□ 해당 분야 10년 이상의 업력과 노하우 보유</strong><br>
         ◦ 대표자는 {industry} 분야에서 실무 및 창업 경험을 보유하고 있으며, 
           시장 니즈에 대한 명확한 이해를 바탕으로 비즈니스 모델을 설계함.<br>
         ◦ CTO는 AI 석사 학위 소지자로 대기업 프로젝트 리딩 경험을 보유하여 
           안정적인 시스템 개발 및 유지보수가 가능함.</p>
-        <p><strong>□ 고용 창출 및 조직 관리 계획</strong><br>
-        ◦ 본 과제 수행을 통해 청년 개발자 및 마케터 3명을 신규 채용하여 
-          정부의 일자리 창출 정책에 기여하고, 수평적 조직 문화를 확립할 계획임.</p>
     </div>
     """
     
     return {"problem": problem, "solution": solution, "scaleup": scaleup, "team": team}
 
-def ghostwrite(text, mode):
-    """페르소나 문서 생성 (HTML 서식)"""
-    if mode == "PSST (정부/심사위원용)":
-        return """
-        <strong>[1. 과제명]</strong><br>
-        폐자원 재활용 공정 효율 30% 향상을 위한 AI 기반 자동 분류 시스템 개발<br><br>
-        <strong>[2. 문제인식 (Problem)]</strong><br>
-        - 기존 수작업 분류 방식의 한계로 인한 생산성 저하 및 인건비 상승<br>
-        - 폐기물 처리 비용 증가로 인한 수익성 악화 (영업이익률 5% 미만)<br><br>
-        <strong>[3. 해결방안 (Solution)]</strong><br>
-        - 딥러닝 비전 인식 기술을 적용한 자동 선별기 도입 (특허출원번호: 10-2024-XXXXX)<br>
-        - 공정 자동화를 통해 처리 속도 2.5배 향상 및 불량률 0.1% 미만 달성<br><br>
-        <strong>[4. 기대효과 (Effect)]</strong><br>
-        - 연간 3억 원의 인건비 절감 및 매출 150% 성장 예상.<br>
-        - 탄소 배출 저감을 통한 ESG 경영 실천 및 정부 그린 뉴딜 정책 부합.
-        """
-    elif mode == "Bank (은행 지점장용)":
+
+def ghostwrite_bank_vc(text, mode):
+    """은행/VC용 텍스트 생성"""
+    if mode == "Bank (은행 지점장용)":
         return """
         <strong>[여신 심사 참고 자료]</strong><br><br>
         <strong>1. 상환 능력 개요</strong><br>
         - 당사는 전년 대비 매출액 200% 성장을 기록하였으며, 영업이익률 15%를 달성하여 안정적인 현금 흐름을 보유하고 있습니다.<br>
         - 금번 운전 자금 대출 시, 생산 설비 확충을 통해 즉각적인 매출 증대가 확실시되어 1년 내 원금 상환이 가능합니다.<br><br>
         <strong>2. 담보 및 신용</strong><br>
-        - 대표자 신용등급 1등급 유지 중이며, 공장 부지에 대한 추가 담보 여력이 존재합니다.<br>
-        - 기술보증기금 보증서 발급 예정으로 은행 리스크가 최소화된 우량 차주입니다.
+        - 대표자 신용등급 1등급 유지 중이며, 공장 부지에 대한 추가 담보 여력이 존재합니다.
         """
     elif mode == "VC (투자 심사역용)":
         return """
@@ -336,8 +213,6 @@ def ghostwrite(text, mode):
         <strong>📈 Traction & Scalability</strong><br>
         - MVP 테스트 완료: 처리 속도 3배 검증<br>
         - SOM (수익 시장): 국내 5,000억 원 -> 3년 내 점유율 10% 달성 목표<br>
-        - Exit Strategy: 5년 내 IPO 또는 대기업 환경 계열사 M&A 목표<br><br>
-        단순한 재활용 회사가 아닙니다. <strong>'폐기물 데이터 플랫폼'</strong>입니다.
         """
     return ""
 
@@ -373,11 +248,15 @@ with st.sidebar:
 
 # 헤더
 st.markdown("""
-<div class='header-box'>
+<div class='header-box' style='padding:20px; background:#fff; border-bottom:3px solid #fee500; margin-bottom:20px;'>
     <h1 style='margin:0; font-size:2.2rem;'>Biz-Finder Enterprise</h1>
     <p style='margin:5px 0 0 0; font-size:1.1rem; color:#555;'>AI 기반 정책자금/프로파일링 통합 솔루션</p>
 </div>
 """, unsafe_allow_html=True)
+
+# 세션 상태 초기화
+if 'run_analysis' not in st.session_state:
+    st.session_state.run_analysis = False
 
 if st.session_state.run_analysis:
     # 1. 재무 계산
@@ -450,18 +329,21 @@ if st.session_state.run_analysis:
             col_p1, col_p2 = st.columns(2)
             with col_p1:
                 item_name = st.text_input("아이템명", "AI 기반 물류 시스템")
+                # 함수 인자 1: industry
                 in_industry = st.selectbox("산업 분야", ["IT/플랫폼", "제조/소부장", "바이오/헬스", "콘텐츠/교육"], key="psst_ind")
             with col_p2:
+                # 함수 인자 2: target
                 target_cust = st.text_input("타겟 고객", "중소기업 경영지원팀")
+                # 함수 인자 3: strength
                 strength = st.text_input("핵심 강점", "특허 기술 보유")
-                
+            
             if st.button("🤖 정밀 사업계획서 생성 (High-Fidelity)"):
                 with st.status("📝 전문 컨설턴트 AI가 집필 중입니다...", expanded=True) as status:
                     time.sleep(1)
                     status.update(label="✅ 완료!", state="complete", expanded=False)
                 
-                # 데이터 생성
-                psst_data = get_real_psst_data(in_industry, item_name, target_cust, strength)
+                # ★★★ 여기가 수정됨: 정확한 함수명 호출 (generate_real_psst) ★★★
+                psst_data = generate_real_psst(in_industry, item_name, target_cust, strength)
                 
                 # 문서 프리뷰
                 st.markdown(f"""
@@ -474,9 +356,6 @@ if st.session_state.run_analysis:
                     {psst_data['solution']}
                     {psst_data['scaleup']}
                     {psst_data['team']}
-                    <div style='margin-top:50px; text-align:center; border-top:1px solid #ddd; padding-top:10px; color:#888; font-size:0.8rem;'>
-                        Generated by Biz-Finder Pro | 위 내용은 편집 가능한 초안입니다.
-                    </div>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -484,14 +363,14 @@ if st.session_state.run_analysis:
             if st.button("✍️ 은행용 요약서 생성하기", key="btn_bank"):
                 with st.spinner("보수적인 은행원 관점으로 작성 중..."):
                     time.sleep(1)
-                content = ghostwrite(raw_text, "Bank (은행 지점장용)")
+                content = ghostwrite_bank_vc(raw_text, "Bank (은행 지점장용)")
                 st.markdown(f"<div class='doc-paper'>{content}</div>", unsafe_allow_html=True)
 
         with subtab3:
             if st.button("✍️ VC용 IR 스크립트 생성하기", key="btn_vc"):
                 with st.spinner("실리콘밸리 스타일로 포장 중..."):
                     time.sleep(1)
-                content = ghostwrite(raw_text, "VC (투자 심사역용)")
+                content = ghostwrite_bank_vc(raw_text, "VC (투자 심사역용)")
                 st.markdown(f"<div class='doc-paper'>{content}</div>", unsafe_allow_html=True)
 
 else:
