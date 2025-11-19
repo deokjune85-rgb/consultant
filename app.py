@@ -158,10 +158,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [2. 로직 엔진 (통합)]
+# [2. 데이터 및 로직 엔진]
 # ==========================================
 
-# 세션 상태 초기화 (화면 튕김 방지)
+# 세션 상태 초기화 (화면 튕김 방지용 핵심 로직)
 if 'run_analysis' not in st.session_state:
     st.session_state.run_analysis = False
 
@@ -197,10 +197,18 @@ def calculate_consulting(revenue, employee):
     """3-in-1 패키지 계산 로직"""
     loan_limit = int(revenue * 0.25)
     if loan_limit > 10: loan_limit = 10 
+    
     hire_support = int(employee * 0.3 * 0.9) 
     tax_save = int(revenue * 0.1 * 0.1) 
-    total = loan_limit + (hire_support/10) + (tax_save/10) 
-    return loan_limit, hire_support, tax_save, total
+    
+    total_benefit = loan_limit + (hire_support/10) + (tax_save/10) 
+    
+    return {
+        "loan": f"{loan_limit}억원",
+        "hire": f"{hire_support}천만원",
+        "tax": f"{tax_save}천만원",
+        "total": f"{total_benefit:.1f}억원"
+    }
 
 def analyze_dna(text):
     """DNA 프로파일링 로직"""
@@ -449,6 +457,11 @@ if st.session_state.run_analysis:
                 st.button("💾 HWP 파일로 변환 및 다운로드")
 
 else:
-    # 대기 화면
+    # 초기 대기 화면
     st.info("👈 왼쪽 사이드바에 정보를 입력하고 [진단 실행] 버튼을 눌러주세요.")
-    st.markdown("<div style='text-align:center; margin-top:50px; color:#999;'>Waiting for Data...</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style='text-align:center; margin-top:50px;'>
+        <h1 style='color:#ccc !important;'>Ready for Analysis</h1>
+        <p style='color:#999 !important;'>데이터를 입력하면 AI가 3,400개 공고를 스캔합니다.</p>
+    </div>
+    """, unsafe_allow_html=True)
