@@ -161,7 +161,7 @@ st.markdown("""
 # [2. 데이터 및 로직 엔진]
 # ==========================================
 
-# 세션 상태 초기화 (화면 튕김 방지용 핵심 로직)
+# 세션 상태 초기화 (화면 튕김 방지)
 if 'run_analysis' not in st.session_state:
     st.session_state.run_analysis = False
 
@@ -194,21 +194,17 @@ success_db = {
 }
 
 def calculate_consulting(revenue, employee):
-    """3-in-1 패키지 계산 로직"""
+    """3-in-1 패키지 계산 로직 (순수 숫자 반환)"""
     loan_limit = int(revenue * 0.25)
     if loan_limit > 10: loan_limit = 10 
     
     hire_support = int(employee * 0.3 * 0.9) 
     tax_save = int(revenue * 0.1 * 0.1) 
     
-    total_benefit = loan_limit + (hire_support/10) + (tax_save/10) 
+    # 억 단위 환산 (float)
+    total_benefit = loan_limit + (hire_support/10) + (tax_save/10)
     
-    return {
-        "loan": f"{loan_limit}억원",
-        "hire": f"{hire_support}천만원",
-        "tax": f"{tax_save}천만원",
-        "total": f"{total_benefit:.1f}억원"
-    }
+    return loan_limit, hire_support, tax_save, total_benefit
 
 def analyze_dna(text):
     """DNA 프로파일링 로직"""
@@ -234,8 +230,8 @@ def analyze_dna(text):
     
     return dna_type, risk, opportunity
 
-def get_real_psst_data(industry, item_name, target, strength):
-    """High-Fidelity PSST 생성 엔진"""
+def generate_dynamic_psst(industry, item_name, target, strength):
+    """PSST 동적 생성 엔진"""
     
     # 1. Problem
     problem = f"""
@@ -306,6 +302,45 @@ def get_real_psst_data(industry, item_name, target, strength):
     
     return {"problem": problem, "solution": solution, "scaleup": scaleup, "team": team}
 
+def ghostwrite(text, mode):
+    """페르소나 문서 생성 (HTML 서식)"""
+    if mode == "PSST (정부/심사위원용)":
+        return """
+        <strong>[1. 과제명]</strong><br>
+        폐자원 재활용 공정 효율 30% 향상을 위한 AI 기반 자동 분류 시스템 개발<br><br>
+        <strong>[2. 문제인식 (Problem)]</strong><br>
+        - 기존 수작업 분류 방식의 한계로 인한 생산성 저하 및 인건비 상승<br>
+        - 폐기물 처리 비용 증가로 인한 수익성 악화 (영업이익률 5% 미만)<br><br>
+        <strong>[3. 해결방안 (Solution)]</strong><br>
+        - 딥러닝 비전 인식 기술을 적용한 자동 선별기 도입 (특허출원번호: 10-2024-XXXXX)<br>
+        - 공정 자동화를 통해 처리 속도 2.5배 향상 및 불량률 0.1% 미만 달성<br><br>
+        <strong>[4. 기대효과 (Effect)]</strong><br>
+        - 연간 3억 원의 인건비 절감 및 매출 150% 성장 예상.<br>
+        - 탄소 배출 저감을 통한 ESG 경영 실천 및 정부 그린 뉴딜 정책 부합.
+        """
+    elif mode == "Bank (은행 지점장용)":
+        return """
+        <strong>[여신 심사 참고 자료]</strong><br><br>
+        <strong>1. 상환 능력 개요</strong><br>
+        - 당사는 전년 대비 매출액 200% 성장을 기록하였으며, 영업이익률 15%를 달성하여 안정적인 현금 흐름을 보유하고 있습니다.<br>
+        - 금번 운전 자금 대출 시, 생산 설비 확충을 통해 즉각적인 매출 증대가 확실시되어 1년 내 원금 상환이 가능합니다.<br><br>
+        <strong>2. 담보 및 신용</strong><br>
+        - 대표자 신용등급 1등급 유지 중이며, 공장 부지에 대한 추가 담보 여력이 존재합니다.<br>
+        - 기술보증기금 보증서 발급 예정으로 은행 리스크가 최소화된 우량 차주입니다.
+        """
+    elif mode == "VC (투자 심사역용)":
+        return """
+        <strong>[Investment Highlight]</strong><br><br>
+        <strong>🚀 Next Climate Tech Unicorn</strong><br>
+        우리는 연간 50조 원 규모의 글로벌 폐기물 시장을 AI로 혁신하고 있습니다.<br><br>
+        <strong>📈 Traction & Scalability</strong><br>
+        - MVP 테스트 완료: 처리 속도 3배 검증<br>
+        - SOM (수익 시장): 국내 5,000억 원 -> 3년 내 점유율 10% 달성 목표<br>
+        - Exit Strategy: 5년 내 IPO 또는 대기업 환경 계열사 M&A 목표<br><br>
+        단순한 재활용 회사가 아닙니다. <strong>'폐기물 데이터 플랫폼'</strong>입니다.
+        """
+    return ""
+
 # ==========================================
 # [3. 사이드바: 입력 폼]
 # ==========================================
@@ -329,7 +364,6 @@ with st.sidebar:
         )
         
     st.markdown("---")
-    # 버튼 클릭 시 상태값 변경 (화면 유지용)
     if st.button("🚀 AI 종합 진단 실행"):
         st.session_state.run_analysis = True
 
@@ -345,7 +379,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 결과 화면 렌더링
 if st.session_state.run_analysis:
     # 1. 재무 계산
     loan, hire, tax, total = calculate_consulting(c_rev, c_emp)
@@ -407,61 +440,61 @@ if st.session_state.run_analysis:
     # --- 3. PSST 자동 작성 탭 ---
     with tab_doc:
         st.markdown("### ✍️ 사업계획서(PSST) 초안 생성")
-        
-        # 추가 입력
-        col_p1, col_p2 = st.columns(2)
-        with col_p1:
-            item_name = st.text_input("아이템명", "AI 기반 물류 시스템")
-            in_industry = st.selectbox("산업 분야", ["IT/플랫폼", "제조/소부장", "바이오/헬스", "콘텐츠/교육"], key="psst_ind")
-        with col_p2:
-            target_cust = st.text_input("타겟 고객", "중소기업 경영지원팀")
-            strength = st.text_input("핵심 강점", "특허 기술 보유")
-            
-        if st.button("🤖 정밀 사업계획서 생성 (High-Fidelity)"):
-            # 로딩 연출
-            with st.status("📝 전문 컨설턴트 AI가 집필 중입니다...", expanded=True) as status:
-                st.write("🔍 산업군별 기술 트렌드 및 경쟁사 약점 분석 중...")
-                time.sleep(1)
-                st.write("⚖️ 정부 평가 지표(기술성/사업성) 기반 논리 구조화...")
-                time.sleep(1)
-                st.write("✒️ 관료적 문체(Government Tone)로 문장 윤문 중...")
-                time.sleep(1)
-                status.update(label="✅ 핵심 요약본 생성 완료!", state="complete", expanded=False)
-            
-            # 데이터 생성
-            psst_data = get_real_psst_data(in_industry, item_name, target_cust, strength)
-            
-            # 문서 프리뷰 (A4 스타일)
-            st.markdown(f"""
-            <div class='doc-paper'>
-                <div style='text-align:center; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:30px;'>
-                    <h2 style='margin:0; font-family:"Batang", serif;'>2025년도 창업성장기술개발사업 사업계획서</h2>
-                    <p style='margin:5px 0 0 0; font-size:0.9rem;'>과제명: {item_name} 개발</p>
-                </div>
+        st.markdown("<p style='font-size:0.9rem; color:#666;'>제출처(정부/은행/VC)에 따라 AI가 가장 합격률 높은 톤앤매너로 문서를 다시 씁니다.</p>", unsafe_allow_html=True)
+
+        # 3개의 하위 탭 생성 (페르소나별)
+        subtab1, subtab2, subtab3 = st.tabs(["👨‍⚖️ 심사위원용 (PSST)", "🏦 은행 지점장용 (여신)", "🤝 투자 심사역용 (VC)"])
+
+        with subtab1:
+            # 추가 입력
+            col_p1, col_p2 = st.columns(2)
+            with col_p1:
+                item_name = st.text_input("아이템명", "AI 기반 물류 시스템")
+                in_industry = st.selectbox("산업 분야", ["IT/플랫폼", "제조/소부장", "바이오/헬스", "콘텐츠/교육"], key="psst_ind")
+            with col_p2:
+                target_cust = st.text_input("타겟 고객", "중소기업 경영지원팀")
+                strength = st.text_input("핵심 강점", "특허 기술 보유")
                 
-                {psst_data['problem']}
-                {psst_data['solution']}
-                {psst_data['scaleup']}
-                {psst_data['team']}
+            if st.button("🤖 정밀 사업계획서 생성 (High-Fidelity)"):
+                with st.status("📝 전문 컨설턴트 AI가 집필 중입니다...", expanded=True) as status:
+                    time.sleep(1)
+                    status.update(label="✅ 완료!", state="complete", expanded=False)
                 
-                <div style='margin-top:50px; text-align:center; border-top:1px solid #ddd; padding-top:10px; color:#888; font-size:0.8rem;'>
-                    Generated by Biz-Finder Pro | 위 내용은 편집 가능한 초안입니다.
+                # 데이터 생성
+                psst_data = get_real_psst_data(in_industry, item_name, target_cust, strength)
+                
+                # 문서 프리뷰
+                st.markdown(f"""
+                <div class='doc-paper'>
+                    <div style='text-align:center; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:30px;'>
+                        <h2 style='margin:0; font-family:"Batang", serif;'>2025년도 창업성장기술개발사업 사업계획서</h2>
+                        <p style='margin:5px 0 0 0; font-size:0.9rem;'>과제명: {item_name} 개발</p>
+                    </div>
+                    {psst_data['problem']}
+                    {psst_data['solution']}
+                    {psst_data['scaleup']}
+                    {psst_data['team']}
+                    <div style='margin-top:50px; text-align:center; border-top:1px solid #ddd; padding-top:10px; color:#888; font-size:0.8rem;'>
+                        Generated by Biz-Finder Pro | 위 내용은 편집 가능한 초안입니다.
+                    </div>
                 </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            col_copy1, col_copy2 = st.columns(2)
-            with col_copy1:
-                st.button("📋 전체 텍스트 클립보드 복사")
-            with col_copy2:
-                st.button("💾 HWP 파일로 변환 및 다운로드")
+                """, unsafe_allow_html=True)
+
+        with subtab2:
+            if st.button("✍️ 은행용 요약서 생성하기", key="btn_bank"):
+                with st.spinner("보수적인 은행원 관점으로 작성 중..."):
+                    time.sleep(1)
+                content = ghostwrite(raw_text, "Bank (은행 지점장용)")
+                st.markdown(f"<div class='doc-paper'>{content}</div>", unsafe_allow_html=True)
+
+        with subtab3:
+            if st.button("✍️ VC용 IR 스크립트 생성하기", key="btn_vc"):
+                with st.spinner("실리콘밸리 스타일로 포장 중..."):
+                    time.sleep(1)
+                content = ghostwrite(raw_text, "VC (투자 심사역용)")
+                st.markdown(f"<div class='doc-paper'>{content}</div>", unsafe_allow_html=True)
 
 else:
-    # 초기 대기 화면
+    # 대기 화면
     st.info("👈 왼쪽 사이드바에 정보를 입력하고 [진단 실행] 버튼을 눌러주세요.")
-    st.markdown("""
-    <div style='text-align:center; margin-top:50px;'>
-        <h1 style='color:#ccc !important;'>Ready for Analysis</h1>
-        <p style='color:#999 !important;'>데이터를 입력하면 AI가 3,400개 공고를 스캔합니다.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("<div style='text-align:center; margin-top:50px; color:#999;'>Waiting for Data...</div>", unsafe_allow_html=True)
