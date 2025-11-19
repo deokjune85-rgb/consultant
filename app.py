@@ -1,4 +1,5 @@
 import streamlit as st
+import plotly.graph_objects as go
 import time
 import random
 import pandas as pd
@@ -122,6 +123,10 @@ st.markdown("""
 # [2. 데이터 및 로직 엔진]
 # ==========================================
 
+# 세션 상태 초기화 (화면 튕김 방지용 핵심 로직)
+if 'analysis_complete' not in st.session_state:
+    st.session_state.analysis_complete = False
+
 # 성공 사례 데이터베이스
 success_db = {
     "IT/소프트웨어": {
@@ -168,9 +173,8 @@ def calculate_consulting(biz_type, revenue, employee):
     }
 
 def generate_dynamic_psst(industry, item_name, target, strength):
-    """PSST 동적 생성 엔진 (문서 스타일 HTML 반환)"""
+    """PSST 동적 생성 엔진"""
     
-    # 1. Problem (문제인식)
     p_templates = [
         f"현재 {target} 시장은 아날로그 방식의 운영으로 인해 비효율이 발생하고 있음.",
         f"기존 {industry} 분야의 솔루션은 도입 비용이 높아 중소기업 접근이 어려움.",
@@ -178,7 +182,6 @@ def generate_dynamic_psst(industry, item_name, target, strength):
     ]
     p_detail = f"- 특히 '{item_name}' 관련 데이터의 부재로 인해 {target}의 불만족이 심화됨.<br>- 기존 방식 대비 시간과 비용이 과다하게 소요되어 생산성 저하 야기."
 
-    # 2. Solution (실현가능성)
     s_templates = [
         f"빅데이터 및 AI 알고리즘을 적용한 '{item_name}' 개발을 통해 문제 해결.",
         f"독자적인 특허 기술을 적용하여 기존 대비 성능을 획기적으로 개선한 '{item_name}' 출시.",
@@ -186,21 +189,18 @@ def generate_dynamic_psst(industry, item_name, target, strength):
     ]
     s_detail = f"- 경쟁사 대비 차별점: {strength} 기술 적용으로 처리 속도 200% 향상.<br>- MVP 테스트를 통해 {target}의 긍정적 피드백 및 초기 데이터 확보 완료."
 
-    # 3. Scale-up (성장전략)
     sc_plan = f"""
     - <strong>(1차년도: 기반 구축)</strong> {item_name} 시제품 개발 및 핵심 특허 2건 출원.
     - <strong>(2차년도: 시장 진입)</strong> 국내 {industry} 주요 거점 대상 시범 서비스 및 레퍼런스 확보.
     - <strong>(3차년도: 글로벌 확장)</strong> 안정화된 솔루션을 바탕으로 동남아/북미 등 해외 시장 판로 개척.
     """
 
-    # 4. Team (팀 구성)
     t_plan = f"""
     - <strong>대표자:</strong> {industry} 분야 10년 이상 경력 및 관련 특허 보유자.
     - <strong>연구소:</strong> AI/SW 개발 전문 인력 3인 및 마케팅 전담 인력 구성 완료.
     - <strong>네트워크:</strong> {target} 관련 협회 및 유관 기관과의 MOU 체결로 판로 사전 확보.
     """
 
-    # HTML 문서 서식
     psst_html = f"""
     <div style='line-height: 1.8; color: #000000;'>
         <h4 style='color: #1e40af !important; border-bottom: 2px solid #1e40af; padding-bottom: 5px; margin-bottom:10px;'>1. 문제인식 (Problem)</h4>
@@ -246,7 +246,10 @@ with st.sidebar:
         c_emp = st.number_input("직원 수(명)", 1, 500, 5)
 
     st.markdown("---")
-    run_btn = st.button("🚀 무료 한도 조회 실행")
+    
+    # 버튼을 누르면 session_state를 True로 변경하여 화면 유지
+    if st.button("🚀 무료 한도 조회 실행"):
+        st.session_state.analysis_complete = True
     
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.info("**[전문가 Tip]**\n서류 제출 없이 사업자 번호만으로 1차 가한도 확인이 가능합니다.")
@@ -263,18 +266,12 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-if run_btn:
-    # 로딩 시뮬레이션
-    with st.status("📊 기업 데이터를 분석 중입니다...", expanded=True) as status:
-        time.sleep(0.5)
-        st.write("📡 NICE 평가정보 / KED 데이터 연동 중...")
-        time.sleep(0.5)
-        st.write("🏦 5대 시중은행 및 정책기관 한도 대조 중...")
-        time.sleep(0.5)
-        st.write("⚖️ 3,400개 지원사업 매칭 알고리즘 가동...")
-        time.sleep(0.5)
-        status.update(label="분석 완료!", state="complete", expanded=False)
-
+# 상태가 True일 때만 결과 화면 렌더링
+if st.session_state.analysis_complete:
+    
+    # 분석 로딩 (최초 1회만 보여주거나 생략 가능하지만, 느낌을 위해 유지)
+    # Streamlit 특성상 re-run 될 때마다 로딩이 보일 수 있음 -> 원하면 제거 가능
+    
     # 결과 계산
     result = calculate_consulting(c_type, c_rev, c_emp)
     ref_case = success_db.get(c_type, success_db["서비스/기타"])
