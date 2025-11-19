@@ -18,29 +18,34 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ★★★ [핵심] A4 용지 시뮬레이션 & 다크 테마 CSS (강제 적용 버전) ★★★
 custom_css = """
 <style>
     /* 기본 블랙 테마 */
     header, footer {visibility: hidden;}
     .stDeployButton {display:none;}
+    
     .stApp {
         background-color: #0E1117;
         color: #E5E7EB;
         font-family: 'Noto Sans KR', sans-serif;
     }
+    
     /* 사이드바 */
     [data-testid="stSidebar"] {
         background-color: #111827;
         border-right: 1px solid #10B981;
     }
-    /* 메트릭 */
+    
+    /* 메트릭 숫자 색상 */
     [data-testid="stMetricValue"] {
         color: #10B981 !important;
         font-family: 'Consolas', monospace;
         font-weight: bold;
         font-size: 36px !important;
     }
-    /* 버튼 */
+    
+    /* 버튼 스타일 */
     button[kind="primary"] {
         background-color: #10B981 !important;
         color: #000000 !important;
@@ -48,7 +53,8 @@ custom_css = """
         border: none;
         transition: all 0.3s ease;
     }
-    /* 탭 */
+    
+    /* 탭 스타일 */
     .stTabs [data-baseweb="tab"] {
         background-color: #1F2937;
         border-radius: 4px 4px 0px 0px;
@@ -62,49 +68,62 @@ custom_css = """
         font-weight: bold;
     }
     
-    /* ★★★ [핵심] A4 용지 시뮬레이션 CSS ★★★ */
+    /* ★★★ A4 용지 스타일 (다크모드 무시하고 흰색 강제) ★★★ */
     .a4-paper {
-        background-color: white;
-        color: black;
-        padding: 40px;
-        margin-top: 20px;
-        border-radius: 2px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
-        position: relative;
+        background-color: #FFFFFF !important; /* 무조건 흰색 */
+        color: #000000 !important;           /* 글자는 검은색 */
+        padding: 40px !important;
+        margin-top: 20px !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 2px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
+        position: relative !important;
+        line-height: 1.6 !important;
     }
-    .doc-header {
-        text-align: center;
-        border-bottom: 2px solid black;
-        padding-bottom: 10px;
-        margin-bottom: 20px;
-    }
-    .doc-title {
-        font-size: 24px;
-        font-weight: bold;
-        margin: 0;
-    }
-    .doc-sub {
-        font-size: 12px;
-        color: #555;
-    }
+    
+    /* 테이블 스타일 강제 */
     .doc-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-        font-size: 14px;
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-bottom: 20px !important;
+        font-size: 14px !important;
+        color: #000000 !important;
     }
     .doc-table th, .doc-table td {
-        border: 1px solid #000;
-        padding: 8px;
-        text-align: left;
+        border: 1px solid #000000 !important;
+        padding: 8px !important;
+        text-align: left !important;
+        color: #000000 !important;
     }
     .doc-table th {
-        background-color: #f0f0f0;
-        text-align: center;
-        font-weight: bold;
+        background-color: #f3f4f6 !important;
+        text-align: center !important;
+        font-weight: bold !important;
     }
-    /* 블러 처리 (유료 유도) */
+    
+    /* 문서 제목 및 폰트 색상 강제 */
+    .doc-title {
+        color: #000000 !important;
+        text-align: center !important;
+        font-size: 24px !important;
+        font-weight: bold !important;
+        margin-bottom: 5px !important;
+    }
+    .doc-sub {
+        display: block !important;
+        text-align: center !important;
+        font-size: 12px !important;
+        color: #666666 !important;
+        margin-bottom: 20px !important;
+        border-bottom: 2px solid #000000 !important;
+        padding-bottom: 15px !important;
+    }
+    .a4-paper p, .a4-paper strong, .a4-paper span {
+        color: #000000 !important;
+    }
+
+    /* 블러 처리 및 페이월 */
     .blur-content {
         filter: blur(4px);
         user-select: none;
@@ -116,7 +135,7 @@ custom_css = """
         left: 50%;
         transform: translateX(-50%);
         background-color: rgba(0,0,0,0.8);
-        color: white;
+        color: white !important;
         padding: 15px 30px;
         border-radius: 30px;
         font-weight: bold;
@@ -129,7 +148,7 @@ custom_css = """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # ---------------------------------------
-# 상태 초기화
+# 상태 초기화 (기억 소자)
 # ---------------------------------------
 if 'analysis_done' not in st.session_state:
     st.session_state.analysis_done = False
@@ -179,10 +198,10 @@ with st.sidebar:
     if st.button("🔄 초기화 (Reset)"):
         st.session_state.analysis_done = False
         st.session_state.psst_generated = False
-        st.experimental_rerun()
+        st.rerun()
 
 # ---------------------------------------
-# 2. [엔진] 로직
+# 2. [엔진] 로직 (가짜 시뮬레이터)
 # ---------------------------------------
 def run_simulation(sales, profit, debt, current_loans, credit, employees, emp_growth, tech_score):
     score = 55
@@ -326,8 +345,6 @@ if st.session_state.analysis_done:
         st.markdown("---")
         st.markdown("### 🖨️ 생성된 사업계획서 (미리보기)")
         
-        # A4 용지 느낌의 HTML
-        # 여기는 '하얀 종이'다.
         a4_html = f"""
         <div class="a4-paper">
             <div class="doc-header">
@@ -338,42 +355,47 @@ if st.session_state.analysis_done:
             <p><strong>1. 신청 기업 개요</strong></p>
             <table class="doc-table">
                 <tr>
-                    <th>업체명</th> <td>(주)IMD솔루션</td> <th>대표자</th> <td>김준</td>
+                    <th style="width: 15%;">업체명</th> <td style="width: 35%;">(주)IMD솔루션</td> 
+                    <th style="width: 15%;">대표자</th> <td style="width: 35%;">김준</td>
                 </tr>
                 <tr>
-                    <th>설립일</th> <td>{2025-biz_year}.01.01</td> <th>업종</th> <td>{biz_type}</td>
+                    <th>설립일</th> <td>{2025-biz_year}.01.01</td> 
+                    <th>업종</th> <td>{biz_type}</td>
                 </tr>
                 <tr>
-                    <th>매출액</th> <td>{sales}억 원</td> <th>상시근로자</th> <td>{employee_count}명</td>
+                    <th>매출액</th> <td>{sales}억 원</td> 
+                    <th>상시근로자</th> <td>{employee_count}명</td>
                 </tr>
             </table>
             
             <p><strong>2. 자금 소요 계획</strong></p>
             <table class="doc-table">
                 <tr>
-                    <th>소요 자금</th> <td>운전자금 300,000,000원</td> <th>자금 용도</th> <td>원부자재 구입 및 R&D 인건비</td>
+                    <th style="width: 20%;">소요 자금</th> 
+                    <td style="width: 30%;">운전자금 300,000,000원</td> 
+                    <th style="width: 20%;">자금 용도</th> 
+                    <td style="width: 30%;">원부자재 구입 및 R&D 인건비</td>
                 </tr>
             </table>
 
             <p><strong>3. 사업 내용 및 기대 효과 (PSST 핵심)</strong></p>
-            <p style="font-size:13px; line-height:1.6;">
-                <strong>[기술성]</strong> 당사는 AI 기반 빅데이터 분석 엔진을 보유하고 있으며, 특허 {1 if has_patent else 0}건을 등록 완료하였습니다. 
-                특히 기업부설연구소를 통해 매년 매출액의 10% 이상을 R&D에 재투자하고 있습니다.<br><br>
-                <strong>[사업성]</strong> 현재 시장 규모는 연평균 15% 성장 중이며, 당사는 독자적인 알고리즘을 통해 경쟁사 대비 30% 높은 효율을 달성했습니다. 
-                본 자금을 통해 마케팅을 강화할 경우 내년 매출 {sales * 1.5}억 원 달성이 확실시됩니다.
-            </p>
+            <div style="border: 1px solid #ddd; padding: 10px; background-color: #fafafa;">
+                <p style="font-size:13px; line-height:1.6; margin:0; color:black;">
+                    <strong>[기술성]</strong> 당사는 AI 기반 빅데이터 분석 엔진을 보유하고 있으며, 특허 {1 if has_patent else 0}건을 등록 완료하였습니다. 
+                    특히 기업부설연구소를 통해 매년 매출액의 10% 이상을 R&D에 재투자하고 있습니다.<br><br>
+                    <strong>[사업성]</strong> 현재 시장 규모는 연평균 15% 성장 중이며, 당사는 독자적인 알고리즘을 통해 경쟁사 대비 30% 높은 효율을 달성했습니다. 
+                    본 자금을 통해 마케팅을 강화할 경우 내년 매출 {sales * 1.5}억 원 달성이 확실시됩니다.
+                </p>
+            </div>
             
             <br>
             <p><strong>4. 세부 추진 일정</strong></p>
             <div class="blur-content">
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
                 <table class="doc-table">
                     <tr><th>구분</th><th>1분기</th><th>2분기</th><th>3분기</th></tr>
                     <tr><td>R&D</td><td>완료</td><td>테스트</td><td>출시</td></tr>
                 </table>
-                <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
                 <p>※ 본 내용은 유료 결제 시 전체 열람이 가능합니다. 전문가의 검토를 거쳐 제출하시기 바랍니다.</p>
             </div>
 
