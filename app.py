@@ -3,7 +3,7 @@ import time
 import random
 
 # ==========================================
-# [1. 시스템 설정 & 카카오 비즈니스 디자인]
+# [1. 시스템 설정 & 강제 화이트 모드 (Nuclear CSS)]
 # ==========================================
 st.set_page_config(
     page_title="Biz-Finder Pro: Profiler",
@@ -12,34 +12,38 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 디자인: 카카오 비즈니스 스타일 (가독성 최우선)
+# 디자인: 카카오 비즈니스 스타일 (가독성 최우선 + 강제성 부여)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
     
     html, body, [class*="css"] {
         font-family: 'Noto Sans KR', sans-serif;
-        background-color: #ffffff;
     }
+
+    /* [핵심 1] 배경 무조건 화이트 (시스템 테마 무시) */
+    [data-testid="stAppViewContainer"] { background-color: #ffffff !important; }
+    [data-testid="stHeader"] { background-color: #ffffff !important; }
+    [data-testid="stSidebar"] { background-color: #f7f7f7 !important; border-right: 1px solid #ececec; }
     
-    /* 텍스트 강제 검정 */
+    /* [핵심 2] 모든 텍스트 무조건 검정 (예외 없음) */
     h1, h2, h3, h4, h5, h6, p, div, span, label, li, td, th {
         color: #191919 !important;
     }
     
-    /* 사이드바 */
-    [data-testid="stSidebar"] {
-        background-color: #f7f7f7 !important;
-        border-right: 1px solid #ececec;
+    /* [핵심 3] 입력창(Input) 강제 스타일링 (배경 흰색, 글자 검정) */
+    .stTextInput input, .stTextArea textarea {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+        border: 1px solid #dcdcdc !important;
+        border-radius: 4px !important;
     }
     
-    /* 입력창 디자인 */
-    .stTextInput > div > div > input, 
-    .stTextArea > div > div > textarea {
-        background-color: #ffffff !important;
+    /* 입력창 라벨 텍스트 색상 */
+    .stTextInput label p, .stTextArea label p {
         color: #191919 !important;
-        border: 1px solid #dcdcdc;
-        border-radius: 4px;
+        font-weight: 600 !important;
     }
 
     /* DNA 분석 카드 */
@@ -82,6 +86,11 @@ st.markdown("""
         font-size: 1rem;
         border-radius: 4px;
     }
+    
+    /* 문서 내부 텍스트 강제 검정 */
+    .doc-paper strong, .doc-paper p, .doc-paper div {
+        color: #000000 !important;
+    }
 
     /* 버튼 스타일 (카카오 옐로우) */
     .stButton > button {
@@ -103,10 +112,15 @@ st.markdown("""
     .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
         font-size: 1.1rem;
         font-weight: bold;
+        color: #191919 !important;
     }
     .stTabs [aria-selected="true"] {
         border-bottom-color: #fee500 !important;
     }
+    
+    /* Expander & Info Box */
+    .streamlit-expanderHeader p { color: #191919 !important; font-weight: 600; }
+    .stAlert div { color: #191919 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -141,10 +155,10 @@ def analyze_dna(text):
 
 def ghostwrite(text, mode):
     """페르소나별 문서 생성 로직"""
-    base_content = "귀사의 핵심 기술인 재활용 공정 효율화 기술을 바탕으로..."
     
+    # HTML 태그 내부에 텍스트 직접 삽입
     if mode == "PSST (정부/심사위원용)":
-        return f"""
+        return """
         <strong>[1. 과제명]</strong><br>
         폐자원 재활용 공정 효율 30% 향상을 위한 AI 기반 자동 분류 시스템 개발<br><br>
         <strong>[2. 문제인식 (Problem)]</strong><br>
@@ -158,7 +172,7 @@ def ghostwrite(text, mode):
         - 탄소 배출 저감을 통한 ESG 경영 실천 및 정부 그린 뉴딜 정책 부합.
         """
     elif mode == "Bank (은행 지점장용)":
-        return f"""
+        return """
         <strong>[여신 심사 참고 자료]</strong><br><br>
         <strong>1. 상환 능력 개요</strong><br>
         - 당사는 전년 대비 매출액 200% 성장을 기록하였으며, 영업이익률 15%를 달성하여 안정적인 현금 흐름을 보유하고 있습니다.<br>
@@ -168,7 +182,7 @@ def ghostwrite(text, mode):
         - 기술보증기금 보증서 발급 예정으로 은행 리스크가 최소화된 우량 차주입니다.
         """
     elif mode == "VC (투자 심사역용)":
-        return f"""
+        return """
         <strong>[Investment Highlight]</strong><br><br>
         <strong>🚀 Next Climate Tech Unicorn</strong><br>
         우리는 연간 50조 원 규모의 글로벌 폐기물 시장을 AI로 혁신하고 있습니다.<br><br>
