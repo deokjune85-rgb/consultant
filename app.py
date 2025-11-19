@@ -5,7 +5,7 @@ import random
 import pandas as pd
 
 # ==========================================
-# [1. 시스템 설정 & 강제 화이트 모드 (Nuclear CSS)]
+# [1. 시스템 설정 & 강제 화이트 모드]
 # ==========================================
 st.set_page_config(
     page_title="Biz-Finder Enterprise",
@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 디자인: 카카오 비즈니스 스타일 (가독성 최우선 + 강제성 부여)
+# 디자인: 카카오 비즈니스 스타일
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
@@ -24,7 +24,7 @@ st.markdown("""
         background-color: #ffffff;
     }
 
-    /* [핵심] 배경 무조건 화이트 & 글자 무조건 검정 */
+    /* 배경 및 텍스트 강제 설정 */
     [data-testid="stAppViewContainer"] { background-color: #ffffff !important; }
     [data-testid="stHeader"] { background-color: #ffffff !important; }
     [data-testid="stSidebar"] { background-color: #f7f7f7 !important; border-right: 1px solid #ececec; }
@@ -33,7 +33,7 @@ st.markdown("""
         color: #191919 !important;
     }
     
-    /* 입력창 강제 스타일링 */
+    /* 입력창 스타일 */
     .stTextInput input, .stNumberInput input, .stSelectbox div, .stTextArea textarea {
         background-color: #ffffff !important;
         color: #000000 !important;
@@ -41,6 +41,12 @@ st.markdown("""
         border-color: #dcdcdc !important;
     }
     
+    /* 입력창 라벨 */
+    .stTextInput label p, .stNumberInput label p, .stSelectbox label p, .stTextArea label p {
+        color: #191919 !important;
+        font-weight: 600 !important;
+    }
+
     /* 카드 UI */
     .info-card {
         background-color: #ffffff;
@@ -51,10 +57,7 @@ st.markdown("""
         margin-bottom: 15px;
     }
 
-    /* KPI 숫자 */
-    .kpi-value { font-size: 2rem; font-weight: 900; color: #3c1e1e !important; } /* 카카오 브라운 */
-    
-    /* 버튼 스타일 (카카오 옐로우) */
+    /* 버튼 스타일 */
     .stButton > button {
         background-color: #fee500 !important;
         color: #191919 !important;
@@ -76,7 +79,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [2. 로직 엔진 (Financial & Profiler & Ghostwriter)]
+# [2. 로직 엔진]
 # ==========================================
 
 # 성공 사례 DB
@@ -87,7 +90,7 @@ success_db = {
     "서비스/기타": {"case": "인테리어 D사", "fund": "3.4억원", "key": "신용관리"}
 }
 
-# 재무 계산 로직
+# 재무 계산 로직 (인자 수정됨: biz_type 제거)
 def calculate_consulting(revenue, employee):
     loan_limit = int(revenue * 0.25)
     if loan_limit > 10: loan_limit = 10
@@ -96,7 +99,7 @@ def calculate_consulting(revenue, employee):
     total = loan_limit + (hire_support/10) + (tax_save/10)
     return loan_limit, hire_support, tax_save, total
 
-# DNA 프로파일링 로직 (돌아왔음!)
+# DNA 프로파일링 로직
 def analyze_dna(text):
     dna_type = "안정지향 일반형"
     risk = []
@@ -116,7 +119,7 @@ def analyze_dna(text):
     
     return dna_type, risk, opportunity
 
-# PSST 내용 생성기 (HTML 태그 없이 순수 텍스트 데이터만 리턴)
+# PSST 생성기
 def get_psst_data(industry, item_name, target, strength):
     return {
         "problem": [
@@ -147,7 +150,6 @@ def get_psst_data(industry, item_name, target, strength):
 with st.sidebar:
     st.markdown("### 🏢 기업 정보 입력")
     
-    # 탭으로 입력창 분리 (깔끔하게)
     tab_basic, tab_memo = st.tabs(["기본정보", "상담노트"])
     
     with tab_basic:
@@ -157,7 +159,6 @@ with st.sidebar:
         c_emp = st.number_input("직원 수(명)", 1, 500, 5)
         
     with tab_memo:
-        # 여기가 프로파일링용 텍스트 입력창
         raw_text = st.text_area(
             "CEO 인터뷰 메모", 
             height=200,
@@ -166,11 +167,17 @@ with st.sidebar:
         )
         
     st.markdown("---")
-    run_btn = st.button("🚀 AI 종합 진단 실행")
+    # 버튼 클릭 시 상태값 변경 (화면 유지용)
+    if st.button("🚀 AI 종합 진단 실행"):
+        st.session_state.run_analysis = True
 
 # ==========================================
 # [4. 메인 대시보드]
 # ==========================================
+
+# 세션 상태 초기화
+if 'run_analysis' not in st.session_state:
+    st.session_state.run_analysis = False
 
 # 헤더
 st.markdown("""
@@ -180,9 +187,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-if run_btn:
-    # 1. 재무 계산
-    loan, hire, tax, total = calculate_consulting(c_type, c_rev, c_emp)
+if st.session_state.run_analysis:
+    # 1. 재무 계산 (인자 2개로 수정 완료)
+    loan, hire, tax, total = calculate_consulting(c_rev, c_emp)
     ref = success_db.get(c_type, success_db["서비스/기타"])
     
     # 2. DNA 분석
@@ -213,7 +220,7 @@ if run_btn:
         </div>
         """, unsafe_allow_html=True)
 
-    # --- 2. 기업 프로파일링 탭 (다시 돌아왔음!) ---
+    # --- 2. 기업 프로파일링 탭 ---
     with tab_dna:
         st.markdown("### 🧠 상담 노트 기반 AI 분석")
         
@@ -235,7 +242,7 @@ if run_btn:
         st.markdown("---")
         st.caption(f"분석 근거: 입력하신 상담 메모 '{raw_text[:20]}...'")
 
-    # --- 3. PSST 자동 작성 탭 (HTML 태그 없이 순정 컴포넌트 사용) ---
+    # --- 3. PSST 자동 작성 탭 ---
     with tab_doc:
         st.markdown("### ✍️ 사업계획서(PSST) 초안 생성")
         
@@ -253,9 +260,7 @@ if run_btn:
             # 데이터 생성
             psst_data = get_psst_data(c_type, item_name, "중소기업", strength)
             
-            # ★★★ 여기가 수정됨: HTML 태그 안 쓰고 스트림릿 기능으로 출력 ★★★
             st.markdown("---")
-            
             st.subheader("1. 문제인식 (Problem)")
             for line in psst_data['problem']:
                 st.write(f"- {line}")
