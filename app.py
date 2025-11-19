@@ -140,7 +140,7 @@ def analyze_dna(text):
     
     return dna_type, risk, opportunity
 
-# ★★★ [수정] PSST 생성 엔진 (HTML 태그 완벽 정리) ★★★
+# PSST 생성 엔진
 def generate_real_psst(industry, item_name, target, strength):
     
     # 1. Problem
@@ -338,18 +338,18 @@ if st.session_state.run_analysis:
             
             psst_data = generate_real_psst(in_industry, item_name, target_cust, strength)
             
-            # ★★★ [최종 수정] 푸터 삭제 + 순수 문서 내용만 출력 ★★★
+            # PSST 문서 출력 (코드 박스 제거)
             st.markdown(f"""
-            <div class='doc-paper'>
-                <div style='text-align:center; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:30px;'>
-                    <h2 style='margin:0; font-family:"Batang", serif;'>2025년도 창업성장기술개발사업 사업계획서</h2>
-                    <p style='margin:5px 0 0 0; font-size:0.9rem;'>과제명: {item_name} 개발</p>
-                </div>
-                {psst_data['problem']}
-                {psst_data['solution']}
-                {psst_data['scaleup']}
-                {psst_data['team']}
-            </div>
+<div class='doc-paper'>
+    <div style='text-align:center; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:30px;'>
+        <h2 style='margin:0; font-family:"Batang", serif;'>2025년도 창업성장기술개발사업 사업계획서</h2>
+        <p style='margin:5px 0 0 0; font-size:0.9rem;'>과제명: {item_name} 개발</p>
+    </div>
+    {psst_data['problem']}
+    {psst_data['solution']}
+    {psst_data['scaleup']}
+    {psst_data['team']}
+</div>
             """, unsafe_allow_html=True)
             
             c1, c2 = st.columns(2)
