@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 디자인: 카카오 비즈니스 스타일 (가독성 최우선 + 강제성 부여)
+# 디자인: 카카오 비즈니스 스타일 (가독성 최우선)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
@@ -59,9 +59,9 @@ st.markdown("""
     }
 
     /* KPI 숫자 */
-    .kpi-value { font-size: 2rem; font-weight: 900; color: #3c1e1e !important; } /* 카카오 브라운 */
+    .kpi-value { font-size: 2rem; font-weight: 900; color: #3c1e1e !important; }
     
-    /* 버튼 스타일 (카카오 옐로우) */
+    /* 버튼 스타일 */
     .stButton > button {
         background-color: #fee500 !important;
         color: #191919 !important;
@@ -75,16 +75,23 @@ st.markdown("""
         background-color: #fdd835 !important;
     }
     
-    /* 문서 스타일 */
+    /* 문서 스타일 (A4 용지) */
     .doc-paper {
         background-color: #fff;
-        border: 1px solid #ddd;
-        padding: 40px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid #ccc;
+        padding: 50px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         min-height: 600px;
         font-family: 'Noto Serif KR', serif;
         line-height: 1.8;
         font-size: 1rem;
+    }
+    .doc-paper h4 {
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-weight: bold;
+        border-bottom: 2px solid #333;
+        padding-bottom: 5px;
     }
 
     /* 탭 스타일 */
@@ -95,7 +102,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [2. 로직 엔진 (Financial & Profiler & Ghostwriter)]
+# [2. 로직 엔진]
 # ==========================================
 
 # 성공 사례 DB
@@ -106,7 +113,6 @@ success_db = {
     "서비스/기타": {"case": "인테리어 D사", "fund": "3.4억원", "key": "신용관리"}
 }
 
-# 재무 계산 로직
 def calculate_consulting(revenue, employee):
     loan_limit = int(revenue * 0.25)
     if loan_limit > 10: loan_limit = 10
@@ -115,7 +121,6 @@ def calculate_consulting(revenue, employee):
     total = loan_limit + (hire_support/10) + (tax_save/10)
     return loan_limit, hire_support, tax_save, total
 
-# DNA 프로파일링 로직
 def analyze_dna(text):
     dna_type = "안정지향 일반형"
     risk = []
@@ -135,84 +140,82 @@ def analyze_dna(text):
     
     return dna_type, risk, opportunity
 
-# ★★★ [수정된 핵심] High-Fidelity PSST 생성 함수 (이름 통일됨) ★★★
+# ★★★ [수정] PSST 생성 엔진 (HTML 태그 완벽 정리) ★★★
 def generate_real_psst(industry, item_name, target, strength):
-    """정부 사업계획서 표준 문체 생성 엔진"""
     
     # 1. Problem
     problem = f"""
-    <div style="margin-bottom: 20px;">
-        <h4 style="color:#191919; font-weight:bold; border-bottom:2px solid #333; padding-bottom:5px;">1-1. 개발 동기 및 필요성</h4>
-        <p><strong>□ {target} 시장의 구조적 비효율과 디지털 전환(DX)의 지체</strong><br>
-        ◦ 현재 {industry} 시장은 노동 집약적이고 아날로그적인 프로세스에 의존하고 있어, 
-          데이터 누락 및 인적 오류(Human Error)로 인한 연간 손실액이 증가하는 추세임.<br>
-        ◦ 특히, 기존 레거시(Legacy) 시스템은 도입 비용이 높고 유지보수가 어려워, 
-          자금력이 부족한 중소기업 및 소상공인의 접근이 원천적으로 차단되어 있음.</p>
-        <p><strong>□ '{item_name}' 도입을 통한 시장 패러다임 전환 시급</strong><br>
-        ◦ 단순한 기능 개선이 아닌, 데이터 기반의 의사결정 구조를 확립하기 위해서는 
-          '{item_name}'과 같은 혁신적 솔루션 도입이 필수적임.</p>
-    </div>
+    <h4>1-1. 개발 동기 및 필요성</h4>
+    <p><strong>□ {target} 시장의 구조적 비효율과 디지털 전환(DX)의 지체</strong><br>
+    ◦ 현재 {industry} 시장은 노동 집약적이고 아날로그적인 프로세스에 의존하고 있어, 
+      데이터 누락 및 인적 오류(Human Error)로 인한 연간 손실액이 증가하는 추세임.<br>
+    ◦ 특히, 기존 레거시(Legacy) 시스템은 도입 비용이 높고 유지보수가 어려워, 
+      자금력이 부족한 중소기업 및 소상공인의 접근이 원천적으로 차단되어 있음.</p>
+    <p><strong>□ '{item_name}' 도입을 통한 시장 패러다임 전환 시급</strong><br>
+    ◦ 단순한 기능 개선이 아닌, 데이터 기반의 의사결정 구조를 확립하기 위해서는 
+      '{item_name}'과 같은 혁신적 솔루션 도입이 필수적임.</p>
     """
 
     # 2. Solution
     solution = f"""
-    <div style="margin-bottom: 20px;">
-        <h4 style="color:#191919; font-weight:bold; border-bottom:2px solid #333; padding-bottom:5px;">2-1. 기술적 차별성 및 독창성</h4>
-        <p><strong>□ 고도화된 알고리즘 적용을 통한 기술적 해자(Moat) 구축</strong><br>
-        ◦ 경쟁사들이 단순 규칙(Rule-base) 기반의 매칭을 제공하는 것과 달리, 
-          당사는 비정형 데이터를 벡터화하여 분석하는 고도화된 알고리즘을 적용함.<br>
-        ◦ 핵심 강점인 <strong>'{strength}'</strong> 기술을 통해 데이터 처리 속도를 200% 향상시켰으며, 
-          이를 통해 실시간 리스크 분석 및 최적화 제안이 가능함 (특허 출원 준비 중).</p>
-    </div>
+    <h4>2-1. 기술적 차별성 및 독창성</h4>
+    <p><strong>□ 고도화된 알고리즘 적용을 통한 기술적 해자(Moat) 구축</strong><br>
+    ◦ 경쟁사들이 단순 규칙(Rule-base) 기반의 매칭을 제공하는 것과 달리, 
+      당사는 비정형 데이터를 벡터화하여 분석하는 고도화된 알고리즘을 적용함.<br>
+    ◦ 핵심 강점인 <strong>'{strength}'</strong> 기술을 통해 데이터 처리 속도를 200% 향상시켰으며, 
+      이를 통해 실시간 리스크 분석 및 최적화 제안이 가능함.</p>
+    <h4>2-2. 사업화 실현 방안</h4>
+    <p><strong>□ SaaS(서비스형 소프트웨어) 모델을 통한 초기 시장 진입</strong><br>
+    ◦ 초기 도입 비용(Capex)을 0원으로 낮추고, 월 구독료(Opex) 모델을 채택하여 
+      가격 저항성을 최소화하고 <strong>{target}</strong> 고객군을 빠르게 확보함.<br>
+    ◦ 웹/앱 하이브리드 아키텍처를 통해 별도의 설치 없이 즉시 사용 가능한 환경을 제공하여 
+      사용자 편의성(UX)을 극대화함.</p>
     """
 
     # 3. Scale-up
     scaleup = f"""
-    <div style="margin-bottom: 20px;">
-        <h4 style="color:#191919; font-weight:bold; border-bottom:2px solid #333; padding-bottom:5px;">3-1. 사업화 및 성장 전략</h4>
-        <p><strong>□ 1단계: 거점 확보 (Targeting)</strong><br>
-        - 수도권 내 {industry} 밀집 지역을 중심으로 테스트베드(Test-bed)를 구축하고, 
-          베타 서비스를 통해 실증 데이터(Log Data)를 확보하여 알고리즘을 고도화함.<br>
-        <strong>□ 2단계: 글로벌 진출 (Global)</strong><br>
-        - 3차년도부터 동남아/북미 시장의 특성을 반영한 현지화 버전을 출시하고, 
-          글로벌 클라우드 마켓플레이스(AWS, Azure)에 입점하여 해외 매출 비중을 30%까지 확대함.</p>
-    </div>
+    <h4>3-1. 사업화 및 성장 전략</h4>
+    <p><strong>□ 1단계: 거점 확보 (Targeting)</strong><br>
+    - 수도권 내 {industry} 밀집 지역을 중심으로 테스트베드(Test-bed)를 구축하고, 
+      베타 서비스를 통해 실증 데이터(Log Data)를 확보하여 알고리즘을 고도화함.<br>
+    <strong>□ 2단계: 글로벌 진출 (Global)</strong><br>
+    - 3차년도부터 동남아/북미 시장의 특성을 반영한 현지화 버전을 출시하고, 
+      글로벌 클라우드 마켓플레이스(AWS, Azure)에 입점하여 해외 매출 비중을 30%까지 확대함.</p>
     """
 
     # 4. Team
     team = f"""
-    <div style="margin-bottom: 20px;">
-        <h4 style="color:#191919; font-weight:bold; border-bottom:2px solid #333; padding-bottom:5px;">4-1. 대표자 및 핵심 인력 역량</h4>
-        <p><strong>□ 해당 분야 10년 이상의 업력과 노하우 보유</strong><br>
-        ◦ 대표자는 {industry} 분야에서 실무 및 창업 경험을 보유하고 있으며, 
-          시장 니즈에 대한 명확한 이해를 바탕으로 비즈니스 모델을 설계함.<br>
-        ◦ CTO는 AI 석사 학위 소지자로 대기업 프로젝트 리딩 경험을 보유하여 
-          안정적인 시스템 개발 및 유지보수가 가능함.</p>
-    </div>
+    <h4>4-1. 대표자 및 핵심 인력 역량</h4>
+    <p><strong>□ 해당 분야 10년 이상의 업력과 노하우 보유</strong><br>
+    ◦ 대표자는 {industry} 분야에서 실무 및 창업 경험을 보유하고 있으며, 
+      시장 니즈에 대한 명확한 이해를 바탕으로 비즈니스 모델을 설계함.<br>
+    ◦ CTO는 AI 석사 학위 소지자로 대기업 프로젝트 리딩 경험을 보유하여 
+      안정적인 시스템 개발 및 유지보수가 가능함.</p>
+    <p><strong>□ 고용 창출 및 조직 관리 계획</strong><br>
+    ◦ 본 과제 수행을 통해 청년 개발자 및 마케터 3명을 신규 채용하여 
+      정부의 일자리 창출 정책에 기여하고, 수평적 조직 문화를 확립할 계획임.</p>
     """
     
     return {"problem": problem, "solution": solution, "scaleup": scaleup, "team": team}
 
-
 def ghostwrite_bank_vc(text, mode):
-    """은행/VC용 텍스트 생성"""
     if mode == "Bank (은행 지점장용)":
         return """
-        <strong>[여신 심사 참고 자료]</strong><br><br>
-        <strong>1. 상환 능력 개요</strong><br>
+        <h4>여신 심사 참고 자료</h4>
+        <p><strong>1. 상환 능력 개요</strong><br>
         - 당사는 전년 대비 매출액 200% 성장을 기록하였으며, 영업이익률 15%를 달성하여 안정적인 현금 흐름을 보유하고 있습니다.<br>
-        - 금번 운전 자금 대출 시, 생산 설비 확충을 통해 즉각적인 매출 증대가 확실시되어 1년 내 원금 상환이 가능합니다.<br><br>
-        <strong>2. 담보 및 신용</strong><br>
-        - 대표자 신용등급 1등급 유지 중이며, 공장 부지에 대한 추가 담보 여력이 존재합니다.
+        - 금번 운전 자금 대출 시, 생산 설비 확충을 통해 즉각적인 매출 증대가 확실시되어 1년 내 원금 상환이 가능합니다.</p>
+        <p><strong>2. 담보 및 신용</strong><br>
+        - 대표자 신용등급 1등급 유지 중이며, 공장 부지에 대한 추가 담보 여력이 존재합니다.</p>
         """
     elif mode == "VC (투자 심사역용)":
         return """
-        <strong>[Investment Highlight]</strong><br><br>
-        <strong>🚀 Next Climate Tech Unicorn</strong><br>
-        우리는 연간 50조 원 규모의 글로벌 폐기물 시장을 AI로 혁신하고 있습니다.<br><br>
-        <strong>📈 Traction & Scalability</strong><br>
+        <h4>Investment Highlight</h4>
+        <p><strong>🚀 Next Climate Tech Unicorn</strong><br>
+        우리는 연간 50조 원 규모의 글로벌 폐기물 시장을 AI로 혁신하고 있습니다.</p>
+        <p><strong>📈 Traction & Scalability</strong><br>
         - MVP 테스트 완료: 처리 속도 3배 검증<br>
-        - SOM (수익 시장): 국내 5,000억 원 -> 3년 내 점유율 10% 달성 목표<br>
+        - SOM (수익 시장): 국내 5,000억 원 -> 3년 내 점유율 10% 달성 목표</p>
         """
     return ""
 
@@ -319,59 +322,39 @@ if st.session_state.run_analysis:
     # --- 3. PSST 자동 작성 탭 ---
     with tab_doc:
         st.markdown("### ✍️ 사업계획서(PSST) 초안 생성")
-        st.markdown("<p style='font-size:0.9rem; color:#666;'>제출처(정부/은행/VC)에 따라 AI가 가장 합격률 높은 톤앤매너로 문서를 다시 씁니다.</p>", unsafe_allow_html=True)
-
-        # 3개의 하위 탭 생성 (페르소나별)
-        subtab1, subtab2, subtab3 = st.tabs(["👨‍⚖️ 심사위원용 (PSST)", "🏦 은행 지점장용 (여신)", "🤝 투자 심사역용 (VC)"])
-
-        with subtab1:
-            # 추가 입력
-            col_p1, col_p2 = st.columns(2)
-            with col_p1:
-                item_name = st.text_input("아이템명", "AI 기반 물류 시스템")
-                # 함수 인자 1: industry
-                in_industry = st.selectbox("산업 분야", ["IT/플랫폼", "제조/소부장", "바이오/헬스", "콘텐츠/교육"], key="psst_ind")
-            with col_p2:
-                # 함수 인자 2: target
-                target_cust = st.text_input("타겟 고객", "중소기업 경영지원팀")
-                # 함수 인자 3: strength
-                strength = st.text_input("핵심 강점", "특허 기술 보유")
+        
+        col_p1, col_p2 = st.columns(2)
+        with col_p1:
+            item_name = st.text_input("아이템명", "AI 기반 물류 시스템")
+            in_industry = st.selectbox("산업 분야", ["IT/플랫폼", "제조/소부장", "바이오/헬스", "콘텐츠/교육"], key="psst_ind")
+        with col_p2:
+            target_cust = st.text_input("타겟 고객", "중소기업 경영지원팀")
+            strength = st.text_input("핵심 강점", "특허 기술 보유")
             
-            if st.button("🤖 정밀 사업계획서 생성 (High-Fidelity)"):
-                with st.status("📝 전문 컨설턴트 AI가 집필 중입니다...", expanded=True) as status:
-                    time.sleep(1)
-                    status.update(label="✅ 완료!", state="complete", expanded=False)
-                
-                # ★★★ 여기가 수정됨: 정확한 함수명 호출 (generate_real_psst) ★★★
-                psst_data = generate_real_psst(in_industry, item_name, target_cust, strength)
-                
-                # 문서 프리뷰
-                st.markdown(f"""
-                <div class='doc-paper'>
-                    <div style='text-align:center; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:30px;'>
-                        <h2 style='margin:0; font-family:"Batang", serif;'>2025년도 창업성장기술개발사업 사업계획서</h2>
-                        <p style='margin:5px 0 0 0; font-size:0.9rem;'>과제명: {item_name} 개발</p>
-                    </div>
-                    {psst_data['problem']}
-                    {psst_data['solution']}
-                    {psst_data['scaleup']}
-                    {psst_data['team']}
+        if st.button("🤖 정밀 사업계획서 생성 (High-Fidelity)"):
+            with st.status("📝 전문 컨설턴트 AI가 집필 중입니다...", expanded=True) as status:
+                time.sleep(1)
+                status.update(label="✅ 완료!", state="complete", expanded=False)
+            
+            psst_data = generate_real_psst(in_industry, item_name, target_cust, strength)
+            
+            # ★★★ [최종 수정] 푸터 삭제 + 순수 문서 내용만 출력 ★★★
+            st.markdown(f"""
+            <div class='doc-paper'>
+                <div style='text-align:center; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:30px;'>
+                    <h2 style='margin:0; font-family:"Batang", serif;'>2025년도 창업성장기술개발사업 사업계획서</h2>
+                    <p style='margin:5px 0 0 0; font-size:0.9rem;'>과제명: {item_name} 개발</p>
                 </div>
-                """, unsafe_allow_html=True)
-
-        with subtab2:
-            if st.button("✍️ 은행용 요약서 생성하기", key="btn_bank"):
-                with st.spinner("보수적인 은행원 관점으로 작성 중..."):
-                    time.sleep(1)
-                content = ghostwrite_bank_vc(raw_text, "Bank (은행 지점장용)")
-                st.markdown(f"<div class='doc-paper'>{content}</div>", unsafe_allow_html=True)
-
-        with subtab3:
-            if st.button("✍️ VC용 IR 스크립트 생성하기", key="btn_vc"):
-                with st.spinner("실리콘밸리 스타일로 포장 중..."):
-                    time.sleep(1)
-                content = ghostwrite_bank_vc(raw_text, "VC (투자 심사역용)")
-                st.markdown(f"<div class='doc-paper'>{content}</div>", unsafe_allow_html=True)
+                {psst_data['problem']}
+                {psst_data['solution']}
+                {psst_data['scaleup']}
+                {psst_data['team']}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            c1, c2 = st.columns(2)
+            with c1: st.button("📋 텍스트 복사")
+            with c2: st.button("💾 파일 다운로드")
 
 else:
     # 대기 화면
