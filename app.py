@@ -14,89 +14,231 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 디자인: 카카오 비즈니스 스타일 (가독성 최우선)
+# 디자인: 전문가용 다크 모드 워룸 스타일
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
     
+    /* [CORE] 절대 다크 모드 베이스 */
     html, body, [class*="css"] {
         font-family: 'Noto Sans KR', sans-serif;
-        background-color: #ffffff;
+        background-color: #0E1117 !important;
+        color: #E5E7EB !important;
     }
 
-    /* [핵심] 배경 무조건 화이트 & 글자 무조건 검정 */
-    [data-testid="stAppViewContainer"] { background-color: #ffffff !important; }
-    [data-testid="stHeader"] { background-color: #ffffff !important; }
-    [data-testid="stSidebar"] { background-color: #f7f7f7 !important; border-right: 1px solid #ececec; }
+    /* [배경] 무조건 어둡게 */
+    [data-testid="stAppViewContainer"] { background-color: #0E1117 !important; }
+    [data-testid="stHeader"] { background-color: #000000 !important; border-bottom: 1px solid #10B981; }
+    [data-testid="stSidebar"] { 
+        background-color: #1F2937 !important; 
+        border-right: 2px solid #3B82F6 !important;
+    }
     
+    /* [텍스트] 기본은 밝은 회색, 중요한 건 형광색 */
     h1, h2, h3, h4, h5, h6, p, div, span, label, li, td, th {
-        color: #191919 !important;
+        color: #E5E7EB !important;
     }
     
-    /* 입력창 강제 스타일링 */
+    /* [핵심 데이터] 볼드체 + 형광색 */
+    .kpi-value { 
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 2.5rem !important; 
+        font-weight: 900 !important; 
+        color: #10B981 !important; 
+        text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+    }
+    
+    /* [입력창] 다크 모드 최적화 */
     .stTextInput input, .stNumberInput input, .stSelectbox div, .stTextArea textarea {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        -webkit-text-fill-color: #000000 !important;
-        border-color: #dcdcdc !important;
+        background-color: #374151 !important;
+        color: #F3F4F6 !important;
+        border: 2px solid #6B7280 !important;
+        border-radius: 4px !important;
+        font-family: 'JetBrains Mono', monospace !important;
+    }
+    .stTextInput input:focus, .stNumberInput input:focus, .stTextArea textarea:focus {
+        border-color: #3B82F6 !important;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
     }
     
-    /* 입력창 라벨 */
+    /* [사이드바 라벨] */
     .stTextInput label p, .stNumberInput label p, .stSelectbox label p, .stTextArea label p {
-        color: #191919 !important;
+        color: #D1D5DB !important;
         font-weight: 600 !important;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
     }
 
-    /* 카드 UI */
-    .info-card {
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 10px;
-        border: 1px solid #eee;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        margin-bottom: 15px;
+    /* [카드 UI] 전문가용 스타일 */
+    .war-room-card {
+        background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+        padding: 25px;
+        border-radius: 8px;
+        border: 1px solid #374151;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        margin-bottom: 20px;
+        position: relative;
+    }
+    .war-room-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #3B82F6, #10B981);
     }
 
-    /* KPI 숫자 */
-    .kpi-value { font-size: 2rem; font-weight: 900; color: #3c1e1e !important; }
-    
-    /* 버튼 스타일 */
+    /* [버튼] 강력한 CTA 스타일 */
     .stButton > button {
-        background-color: #fee500 !important;
-        color: #191919 !important;
+        background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%) !important;
+        color: #FFFFFF !important;
         font-weight: 800 !important;
+        font-family: 'Noto Sans KR', sans-serif !important;
         border: none;
-        padding: 15px;
+        padding: 18px 30px !important;
         border-radius: 6px;
         width: 100%;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        transition: all 0.2s;
     }
     .stButton > button:hover {
-        background-color: #fdd835 !important;
+        background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%) !important;
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        transform: translateY(-2px);
     }
     
-    /* 문서 스타일 (A4 용지) */
+    /* [문서 스타일] 전문 보고서 느낌 */
     .doc-paper {
-        background-color: #fff;
-        border: 1px solid #ccc;
-        padding: 50px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+        border: 1px solid #374151;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         min-height: 600px;
-        font-family: 'Noto Serif KR', serif;
+        font-family: 'Noto Sans KR', sans-serif;
         line-height: 1.8;
         font-size: 1rem;
+        color: #E5E7EB;
     }
     .doc-paper h4 {
-        margin-top: 20px;
-        margin-bottom: 10px;
+        margin-top: 25px;
+        margin-bottom: 15px;
         font-weight: bold;
-        border-bottom: 2px solid #333;
-        padding-bottom: 5px;
+        color: #10B981 !important;
+        border-bottom: 2px solid #10B981;
+        padding-bottom: 8px;
+        font-family: 'JetBrains Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .doc-paper h2 {
+        color: #3B82F6 !important;
+        text-align: center;
+        font-weight: 900;
     }
 
-    /* 탭 스타일 */
+    /* [탭] 프로페셔널 스타일 */
     .stTabs [aria-selected="true"] {
-        border-bottom-color: #fee500 !important;
+        background-color: #374151 !important;
+        border-bottom: 3px solid #10B981 !important;
+        color: #10B981 !important;
+    }
+    .stTabs button {
+        color: #9CA3AF !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* [헤더] 워룸 스타일 */
+    .war-room-header {
+        background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+        padding: 30px;
+        border: 1px solid #374151;
+        border-left: 4px solid #10B981;
+        margin-bottom: 30px;
+        position: relative;
+    }
+    .war-room-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #F3F4F6 !important;
+        font-family: 'JetBrains Mono', monospace;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    .war-room-header p {
+        margin: 8px 0 0 0;
+        font-size: 1rem;
+        color: #9CA3AF !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .status-indicator {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: #10B981 !important;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* [상태 표시등] */
+    .api-status {
+        background: #059669;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 0 10px rgba(5, 150, 105, 0.3);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 10px rgba(5, 150, 105, 0.3); }
+        50% { box-shadow: 0 0 20px rgba(5, 150, 105, 0.6); }
+        100% { box-shadow: 0 0 10px rgba(5, 150, 105, 0.3); }
+    }
+
+    /* [경고/보안 메시지] */
+    .security-notice {
+        background: linear-gradient(135deg, #7F1D1D 0%, #991B1B 100%);
+        color: #FCA5A5;
+        padding: 15px;
+        border-radius: 6px;
+        border-left: 4px solid #DC2626;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 20px;
+    }
+
+    /* [결과 카드들] */
+    .result-card {
+        background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+        border: 1px solid #374151;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 4px solid #3B82F6;
+    }
+    .result-card h4 {
+        color: #3B82F6 !important;
+        margin-bottom: 10px;
+        font-family: 'JetBrains Mono', monospace;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -207,40 +349,58 @@ def ghostwrite_bank_vc(text, mode):
     return ""
 
 # ==========================================
-# [3. 사이드바: 입력 폼]
+# [3. 사이드바: 컨트롤러]
 # ==========================================
 with st.sidebar:
-    st.markdown("### 🏢 기업 정보 입력")
+    # API 상태등
+    st.markdown('<div class="api-status">🟢 SYSTEM ONLINE</div>', unsafe_allow_html=True)
+    st.markdown("---")
     
-    tab_basic, tab_memo = st.tabs(["기본정보", "상담노트"])
+    # 보안 경고
+    st.markdown("""
+    <div class="security-notice">
+        ⚠️ AUTHORIZED PERSONNEL ONLY<br>
+        CONFIDENTIAL BUSINESS INTELLIGENCE
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("### 🎯 TARGET MODULE")
+    
+    tab_basic, tab_memo = st.tabs(["DATA INPUT", "INTEL NOTES"])
     
     with tab_basic:
-        c_name = st.text_input("기업명", "미래테크")
-        c_type = st.selectbox("업종", ["IT/소프트웨어", "제조업", "도소매/유통", "서비스/기타"])
-        c_rev = st.number_input("연 매출(억)", 1.0, 1000.0, 10.0)
-        c_emp = st.number_input("직원 수(명)", 1, 500, 5)
+        c_name = st.text_input("COMPANY ID", "미래테크")
+        c_type = st.selectbox("SECTOR", ["IT/소프트웨어", "제조업", "도소매/유통", "서비스/기타"])
+        c_rev = st.number_input("REVENUE (억)", 1.0, 1000.0, 10.0)
+        c_emp = st.number_input("HEADCOUNT", 1, 500, 5)
         
     with tab_memo:
         raw_text = st.text_area(
-            "CEO 인터뷰 메모", 
+            "FIELD INTEL", 
             height=200,
             value="사장님이 기술 욕심은 많음. 특허도 하나 있음. 근데 당장 현금이 없어서 담보 대출은 꽉 찼다고 함. 수출도 하고 싶어 함.",
-            help="상담 내용을 적으면 AI가 성향을 분석합니다."
+            help="Field intelligence for profile analysis"
         )
         
     st.markdown("---")
-    if st.button("🚀 AI 종합 진단 실행"):
+    if st.button("🚀 EXECUTE ANALYSIS"):
         st.session_state.run_analysis = True
+    
+    st.markdown("---")
+    if st.button("🔴 EMERGENCY RESET"):
+        st.session_state.clear()
+        st.rerun()
 
 # ==========================================
 # [4. 메인 대시보드]
 # ==========================================
 
-# 헤더
+# 헤더: 워룸 스타일
 st.markdown("""
-<div class='header-box' style='padding:20px; background:#fff; border-bottom:3px solid #fee500; margin-bottom:20px;'>
-    <h1 style='margin:0; font-size:2.2rem;'>Biz-Finder Enterprise</h1>
-    <p style='margin:5px 0 0 0; font-size:1.1rem; color:#555;'>AI 기반 정책자금/프로파일링 통합 솔루션</p>
+<div class='war-room-header'>
+    <div class='status-indicator'>🛡️ CLASSIFIED</div>
+    <h1>ACTIVATED: BIZ-FINDER PROTOCOL</h1>
+    <p>AI-POWERED BUSINESS INTELLIGENCE SYSTEM</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -261,50 +421,76 @@ if st.session_state.run_analysis:
 
     # --- 1. 자금/재무 진단 탭 ---
     with tab_finance:
-        st.markdown(f"### 📊 {c_name} 예상 조달 규모: 총 {total:.1f}억원")
+        st.markdown(f"### 💰 {c_name} FUNDING ANALYSIS")
+        st.markdown(f"#### 🎯 TOTAL PROJECTION: {total:.1f}억원")
         
         k1, k2, k3 = st.columns(3)
         with k1:
-            st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>정책자금(융자)</div><div class='kpi-value'>{loan}억원</div><div class='kpi-sub'>중진공/신보</div></div>""", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class='war-room-card'>
+                <div style='text-align:center;'>
+                    <div style='color:#6B7280; font-size:0.9rem; font-weight:600; margin-bottom:10px;'>POLICY LOAN</div>
+                    <div class='kpi-value'>{loan}억원</div>
+                    <div style='color:#9CA3AF; font-size:0.8rem; margin-top:5px;'>중진공/신보</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
         with k2:
-            st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>고용지원금</div><div class='kpi-value'>{hire}천만원</div><div class='kpi-sub'>청년/특별고용</div></div>""", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class='war-room-card'>
+                <div style='text-align:center;'>
+                    <div style='color:#6B7280; font-size:0.9rem; font-weight:600; margin-bottom:10px;'>EMPLOYMENT GRANT</div>
+                    <div class='kpi-value'>{hire}천만원</div>
+                    <div style='color:#9CA3AF; font-size:0.8rem; margin-top:5px;'>청년/특별고용</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
         with k3:
-            st.markdown(f"""<div class='info-card kpi-metric'><div class='kpi-title'>세금 절세</div><div class='kpi-value'>{tax}천만원</div><div class='kpi-sub'>법인세 감면</div></div>""", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class='war-room-card'>
+                <div style='text-align:center;'>
+                    <div style='color:#6B7280; font-size:0.9rem; font-weight:600; margin-bottom:10px;'>TAX SAVINGS</div>
+                    <div class='kpi-value'>{tax}천만원</div>
+                    <div style='color:#9CA3AF; font-size:0.8rem; margin-top:5px;'>법인세 감면</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
         st.markdown("---")
-        st.markdown("#### 🏆 동종 업계 성공 사례")
+        st.markdown("#### 🏆 SUCCESS CASE REFERENCE")
         st.markdown(f"""
-        <div class='success-case'>
-            <strong>{ref['case']} 승인 내역</strong><br>
-            💰 총 조달: <span style='color:#d97706; font-weight:bold;'>{ref['fund']}</span><br>
-            🔑 성공 키워드: {ref['key']}
+        <div class='war-room-card'>
+            <strong>📋 {ref['case']} APPROVED CASE</strong><br>
+            💰 Total Funding: <span style='color:#10B981; font-weight:bold; font-family:JetBrains Mono;'>{ref['fund']}</span><br>
+            🔑 Success Factor: {ref['key']}
         </div>
         """, unsafe_allow_html=True)
 
     # --- 2. 기업 프로파일링 탭 ---
     with tab_dna:
-        st.markdown("### 🧠 상담 노트 기반 AI 분석")
+        st.markdown("### 🧬 CORPORATE DNA ANALYSIS")
         
         col_d1, col_d2 = st.columns(2)
         
         with col_d1:
-            st.markdown("#### 🧬 기업 DNA 유형")
+            st.markdown("#### 💾 PROFILE TYPE")
             st.markdown(f"""
-            <div class='dna-card' style='text-align:center;'>
-                <h2 style='color:#3c1e1e !important; margin:0;'>{dna_type}</h2>
+            <div class='war-room-card' style='text-align:center;'>
+                <h2 style='color:#10B981 !important; margin:0; font-family:JetBrains Mono;'>{dna_type}</h2>
             </div>
             """, unsafe_allow_html=True)
             
         with col_d2:
-            st.markdown("#### ⚠️ 발견된 리스크 & 기회")
+            st.markdown("#### ⚠️ RISK & OPPORTUNITY MATRIX")
             st.markdown(f"""
-            <div class='alert-box-risk'>🚨 [RISK] {risks[0]}</div>
-            <div style='margin-top:10px;'></div>
-            <div class='alert-box-opp'>💡 [OPPORTUNITY] {opps[0]}</div>
+            <div class='war-room-card'>
+                <div style='color:#EF4444; margin-bottom:15px;'>🚨 <strong>RISK DETECTED</strong><br>{risks[0]}</div>
+                <div style='color:#10B981;'>💡 <strong>OPPORTUNITY IDENTIFIED</strong><br>{opps[0]}</div>
+            </div>
             """, unsafe_allow_html=True)
             
         st.markdown("---")
-        st.caption(f"분석 근거: 입력하신 상담 메모 '{raw_text[:20]}...'")
+        st.caption(f"📊 Analysis Source: '{raw_text[:20]}...'")
 
     # --- 3. PSST 자동 작성 탭 ---
     with tab_doc:
@@ -319,9 +505,15 @@ if st.session_state.run_analysis:
             strength = st.text_input("핵심 강점", "특허 기술 보유")
             
         if st.button("🤖 정밀 사업계획서 생성 (High-Fidelity)"):
-            with st.status("📝 전문 컨설턴트 AI가 집필 중입니다...", expanded=True) as status:
-                time.sleep(1)
-                status.update(label="✅ 완료!", state="complete", expanded=False)
+            with st.status("💾 ADVANCED AI PROCESSING...", expanded=True) as status:
+                st.write("🔍 DATABASE SCANNING...")
+                time.sleep(0.3)
+                st.write("🧠 PATTERN ANALYSIS...")
+                time.sleep(0.3)
+                st.write("📊 FINANCIAL MODELING...")
+                time.sleep(0.3)
+                st.write("✅ DOCUMENT GENERATION COMPLETE")
+                status.update(label="🛡️ CLASSIFIED DOCUMENT READY", state="complete", expanded=False)
             
             psst_data = generate_real_psst(in_industry, item_name, target_cust, strength)
             
@@ -343,6 +535,11 @@ if st.session_state.run_analysis:
             with c2: st.button("💾 파일 다운로드")
 
 else:
-    # 대기 화면
-    st.info("👈 왼쪽 사이드바에 정보를 입력하고 [진단 실행] 버튼을 눌러주세요.")
-    st.markdown("<div style='text-align:center; margin-top:50px; color:#999;'>Waiting for Data...</div>", unsafe_allow_html=True)
+    # 대기 화면: 워룸 스타일
+    st.markdown("""
+    <div class='war-room-card' style='text-align:center; padding:60px;'>
+        <h2 style='color:#6B7280; margin-bottom:20px;'>⏳ SYSTEM STANDBY</h2>
+        <p style='color:#9CA3AF; font-size:1.2rem;'>Configure parameters in CONTROLLER panel</p>
+        <p style='color:#6B7280; font-size:0.9rem; margin-top:30px;'>👈 Input data and execute analysis</p>
+    </div>
+    """, unsafe_allow_html=True)
