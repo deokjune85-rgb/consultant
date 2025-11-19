@@ -1,5 +1,5 @@
 # =====================================================
-# 💰 IMD BIZ-FINDER FINAL (Fixed) — 기억 소자 이식 버전
+# 💰 IMD BIZ-FINDER FINAL (Document UI) — 서류 시뮬레이션 탑재
 # =====================================================
 import streamlit as st
 import pandas as pd
@@ -20,6 +20,7 @@ st.set_page_config(
 
 custom_css = """
 <style>
+    /* 기본 블랙 테마 */
     header, footer {visibility: hidden;}
     .stDeployButton {display:none;}
     .stApp {
@@ -27,16 +28,19 @@ custom_css = """
         color: #E5E7EB;
         font-family: 'Noto Sans KR', sans-serif;
     }
+    /* 사이드바 */
     [data-testid="stSidebar"] {
         background-color: #111827;
         border-right: 1px solid #10B981;
     }
+    /* 메트릭 */
     [data-testid="stMetricValue"] {
         color: #10B981 !important;
         font-family: 'Consolas', monospace;
         font-weight: bold;
         font-size: 36px !important;
     }
+    /* 버튼 */
     button[kind="primary"] {
         background-color: #10B981 !important;
         color: #000000 !important;
@@ -44,15 +48,8 @@ custom_css = """
         border: none;
         transition: all 0.3s ease;
     }
-    .stTextInput > div > div > input, .stNumberInput > div > div > input {
-        background-color: #1F2937;
-        color: white;
-        border: 1px solid #374151;
-        border-radius: 4px;
-    }
+    /* 탭 */
     .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        white-space: pre-wrap;
         background-color: #1F2937;
         border-radius: 4px 4px 0px 0px;
         gap: 1px;
@@ -64,22 +61,87 @@ custom_css = """
         color: black;
         font-weight: bold;
     }
+    
+    /* ★★★ [핵심] A4 용지 시뮬레이션 CSS ★★★ */
+    .a4-paper {
+        background-color: white;
+        color: black;
+        padding: 40px;
+        margin-top: 20px;
+        border-radius: 2px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+        position: relative;
+    }
+    .doc-header {
+        text-align: center;
+        border-bottom: 2px solid black;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    .doc-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0;
+    }
+    .doc-sub {
+        font-size: 12px;
+        color: #555;
+    }
+    .doc-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    .doc-table th, .doc-table td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: left;
+    }
+    .doc-table th {
+        background-color: #f0f0f0;
+        text-align: center;
+        font-weight: bold;
+    }
+    /* 블러 처리 (유료 유도) */
+    .blur-content {
+        filter: blur(4px);
+        user-select: none;
+        opacity: 0.6;
+    }
+    .paywall-overlay {
+        position: absolute;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0,0,0,0.8);
+        color: white;
+        padding: 15px 30px;
+        border-radius: 30px;
+        font-weight: bold;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        z-index: 10;
+        text-align: center;
+    }
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # ---------------------------------------
-# ★ 핵심 수정: 상태(State) 초기화
+# 상태 초기화
 # ---------------------------------------
 if 'analysis_done' not in st.session_state:
     st.session_state.analysis_done = False
+if 'psst_generated' not in st.session_state:
+    st.session_state.psst_generated = False
 
 # ---------------------------------------
-# 1. [사이드바] 정밀 입력 패널
+# 1. [사이드바] 입력 패널
 # ---------------------------------------
 with st.sidebar:
     st.title("💰 BIZ-FINDER")
-    st.caption("정책자금 AI 정밀 진단 v2.0")
+    st.caption("정책자금 AI 정밀 진단 v2.1")
     st.markdown("---")
 
     st.markdown("### 1️⃣ 기업 개요 (Basic)")
@@ -109,19 +171,18 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # ★ 핵심 수정: 버튼을 누르면 '상태'를 True로 변경
     if st.button("🚀 AI 정밀 진단 실행", type="primary", use_container_width=True):
         st.session_state.analysis_done = True
-        st.session_state.show_spinner = True # 스피너를 보여줄지 말지 결정
+        st.session_state.show_spinner = True
+        st.session_state.psst_generated = False # 진단 다시 하면 문서도 리셋
     
-    # 초기화 버튼
     if st.button("🔄 초기화 (Reset)"):
         st.session_state.analysis_done = False
+        st.session_state.psst_generated = False
         st.experimental_rerun()
 
-
 # ---------------------------------------
-# 2. [엔진] 시뮬레이션 로직
+# 2. [엔진] 로직
 # ---------------------------------------
 def run_simulation(sales, profit, debt, current_loans, credit, employees, emp_growth, tech_score):
     score = 55
@@ -146,18 +207,16 @@ def run_simulation(sales, profit, debt, current_loans, credit, employees, emp_gr
 
     return min(score, 98), remaining_limit
 
-
 # ---------------------------------------
-# 3. [메인] 결과 대시보드 (War Room)
+# 3. [메인] 결과 대시보드
 # ---------------------------------------
 st.title("🛡️ IMD Policy Fund Analysis")
 st.caption(f"Target: **{biz_type}** | Established: **{biz_year}년차** | Data: **2025.05.20 Live**")
 st.markdown("---")
 
-# ★ 핵심 수정: 버튼이 아니라 '상태(session_state)'를 확인한다.
 if st.session_state.analysis_done:
     
-    # [A. 할리우드 해킹 연출] - 처음 실행될 때만 보여준다.
+    # [A. 할리우드 연출]
     if st.session_state.get('show_spinner'):
         status_container = st.empty()
         bar = st.progress(0)
@@ -172,14 +231,14 @@ if st.session_state.analysis_done:
             "🚀 최종 적합도 산출 완료."
         ]
         for i, log in enumerate(logs):
-            time.sleep(random.uniform(0.1, 0.3)) 
+            time.sleep(random.uniform(0.1, 0.2)) 
             status_container.markdown(f"```text\n[SYSTEM] {log}\n```")
             bar.progress(int((i + 1) / len(logs) * 100))
         
-        time.sleep(0.5)
+        time.sleep(0.3)
         status_container.empty()
         bar.empty()
-        st.session_state.show_spinner = False # 다음부터는 스피너 안 보여줌
+        st.session_state.show_spinner = False
 
     # [B. 결과 계산]
     tech_points = sum([has_lab, has_patent, is_venture, is_women])
@@ -245,7 +304,7 @@ if st.session_state.analysis_done:
     # [E. 추천 자금 리스트]
     st.markdown("### 📂 2025년도 최적 매칭 자금 (Top 3)")
     
-    tab1, tab2, tab3 = st.tabs(["💸 운전자금 (Working)", "🏭 시설자금 (Facility)", "🧪 R&D 과제 (Tech)"])
+    tab1, tab2, tab3 = st.tabs(["💸 운전자금", "🏭 시설자금", "🧪 R&D 과제"])
     
     with tab1:
         st.markdown(f"""
@@ -256,36 +315,75 @@ if st.session_state.analysis_done:
         | **신성장동력보증** | 신용보증기금 | **{min(final_limit, 3)}억** | 보증료 0.2%↓ | ⭐⭐⭐⭐ |
         """)
         
-        # ★ 여기가 문제였던 곳 ★
-        # 버튼을 눌러도 st.session_state.analysis_done이 True로 유지되므로 리포트가 사라지지 않음.
+        # 버튼 클릭 시 상태 변경
         if st.button("📄 '혁신성장' 사업계획서(PSST) 초안 생성", key="btn1", type="primary"):
-            with st.spinner("사업계획서 생성 중... (AI Writing)"):
+            with st.spinner("사업계획서 구조화 및 AI 작문 중..."):
                 time.sleep(2)
-            st.success("✅ 사업계획서 초안 생성이 완료되었습니다! (다운로드 준비 완료)")
-            st.markdown("""
-            ```text
-            [사업계획서 요약]
-            1. 과제명: AI 기반 빅데이터 분석 솔루션 개발
-            2. 필요자금: 300,000,000원
-            3. 사업화 전략: B2B SaaS 모델을 통한 구독 경제 구축...
-            (이하 생략 - 유료 버전에서 전체 공개)
-            ```
-            """)
-            
-    with tab2:
-        st.info("💡 공장 매입, 기계 설비 도입 시 최대 100억까지 한도가 늘어납니다.")
-        st.markdown("""
-        | 자금명 | 주관기관 | 한도 | 비고 |
-        | :--- | :--- | :--- | :--- |
-        | **스마트공장 구축지원** | 스마트제조혁신추진단 | 2억 | 자부담 50% |
-        | **시설구조개선자금** | 중진공 | 60억 | 10년 상환 |
-        """)
+            st.session_state.psst_generated = True
+    
+    # [F. ★★★ 가짜 서류 시뮬레이션 (HTML Injection) ★★★]
+    if st.session_state.psst_generated:
+        st.markdown("---")
+        st.markdown("### 🖨️ 생성된 사업계획서 (미리보기)")
         
-    with tab3:
-        st.markdown("""
-        * **디딤돌 R&D 과제 (첫걸음)**: 최대 1.2억 지원 (경쟁률 15:1)
-        * **팁스(TIPS) 연계형**: 투자 유치 선행 필수.
-        """)
+        # A4 용지 느낌의 HTML
+        # 여기는 '하얀 종이'다.
+        a4_html = f"""
+        <div class="a4-paper">
+            <div class="doc-header">
+                <h1 class="doc-title">2025년 중소기업 정책자금 융자신청서</h1>
+                <span class="doc-sub">Form ID: 2025-KOSME-LN-01 (혁신성장지원자금)</span>
+            </div>
+            
+            <p><strong>1. 신청 기업 개요</strong></p>
+            <table class="doc-table">
+                <tr>
+                    <th>업체명</th> <td>(주)IMD솔루션</td> <th>대표자</th> <td>김준</td>
+                </tr>
+                <tr>
+                    <th>설립일</th> <td>{2025-biz_year}.01.01</td> <th>업종</th> <td>{biz_type}</td>
+                </tr>
+                <tr>
+                    <th>매출액</th> <td>{sales}억 원</td> <th>상시근로자</th> <td>{employee_count}명</td>
+                </tr>
+            </table>
+            
+            <p><strong>2. 자금 소요 계획</strong></p>
+            <table class="doc-table">
+                <tr>
+                    <th>소요 자금</th> <td>운전자금 300,000,000원</td> <th>자금 용도</th> <td>원부자재 구입 및 R&D 인건비</td>
+                </tr>
+            </table>
+
+            <p><strong>3. 사업 내용 및 기대 효과 (PSST 핵심)</strong></p>
+            <p style="font-size:13px; line-height:1.6;">
+                <strong>[기술성]</strong> 당사는 AI 기반 빅데이터 분석 엔진을 보유하고 있으며, 특허 {1 if has_patent else 0}건을 등록 완료하였습니다. 
+                특히 기업부설연구소를 통해 매년 매출액의 10% 이상을 R&D에 재투자하고 있습니다.<br><br>
+                <strong>[사업성]</strong> 현재 시장 규모는 연평균 15% 성장 중이며, 당사는 독자적인 알고리즘을 통해 경쟁사 대비 30% 높은 효율을 달성했습니다. 
+                본 자금을 통해 마케팅을 강화할 경우 내년 매출 {sales * 1.5}억 원 달성이 확실시됩니다.
+            </p>
+            
+            <br>
+            <p><strong>4. 세부 추진 일정</strong></p>
+            <div class="blur-content">
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                <table class="doc-table">
+                    <tr><th>구분</th><th>1분기</th><th>2분기</th><th>3분기</th></tr>
+                    <tr><td>R&D</td><td>완료</td><td>테스트</td><td>출시</td></tr>
+                </table>
+                <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <p>※ 본 내용은 유료 결제 시 전체 열람이 가능합니다. 전문가의 검토를 거쳐 제출하시기 바랍니다.</p>
+            </div>
+
+            <div class="paywall-overlay">
+                🔒 PREMIUM REPORT<br>
+                <span style="font-size:12px; font-weight:normal;">(유료 버전에서 전체 다운로드 가능)</span>
+            </div>
+        </div>
+        """
+        st.markdown(a4_html, unsafe_allow_html=True)
 
 else:
     # 대기 화면
