@@ -6,7 +6,6 @@ import streamlit as st
 import google.generativeai as genai
 import time
 import random
-import os
 
 # ---------------------------------------
 # 0. [UI/UX] 시스템 설정 (Dark & Creator Mode)
