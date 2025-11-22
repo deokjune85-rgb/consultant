@@ -70,29 +70,15 @@ custom_css = """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # ---------------------------------------
-# 1. API 및 엔진 초기화  
+# 1. API 및 엔진 초기화
 # ---------------------------------------
-@st.cache_resource
-def initialize_model():
-    try:
-        # secrets.toml 또는 환경변수에서 API 키 가져오기
-        if hasattr(st, 'secrets') and "GOOGLE_API_KEY" in st.secrets:
-            api_key = st.secrets["GOOGLE_API_KEY"]
-        else:
-            import os
-            api_key = os.getenv("GOOGLE_API_KEY")
-            
-        if not api_key:
-            st.error("❌ API 키를 찾을 수 없습니다. secrets.toml 파일에 GOOGLE_API_KEY를 설정하거나 환경변수를 확인하세요.")
-            st.stop()
-            
-        genai.configure(api_key=api_key)
-        return genai.GenerativeModel("models/gemini-1.5-flash")
-    except Exception as e:
-        st.error(f"❌ API 초기화 오류: {str(e)}")
-        st.stop()
-
-model = initialize_model()
+try:
+    API_KEY = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=API_KEY)
+    model = genai.GenerativeModel("models/gemini-1.5-flash")
+except:
+    st.error("❌ API 키 오류. secrets.toml을 확인하라.")
+    st.stop()
 
 # ---------------------------------------
 # 2. [사이드바] 데이터 주입 및 설정
